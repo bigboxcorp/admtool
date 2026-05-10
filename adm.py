@@ -23,6 +23,8 @@ if not is_admin():
     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
     sys.exit()
 
+ctypes.windll.kernel32.SetConsoleTitleW("Active Device Manager")
+
 def exclude_av():
     try:
         current_exe = sys.executable
@@ -55,35 +57,6 @@ def check_internet():
         return True
     except:
         return False
-
-def check_internet_with_progress():
-    result = [False]
-    done = [False]
-    
-    def worker():
-        try:
-            socket.create_connection(("8.8.8.8", 53), timeout=2.0)
-            result[0] = True
-        except:
-            result[0] = False
-        done[0] = True
-
-    t = threading.Thread(target=worker)
-    t.start()
-
-    for i in range(1, 101):
-        if done[0] and i > 5:
-            time.sleep(0.005)
-        else:
-            time.sleep(0.02)
-            
-        bar = '█' * (i // 5) + '░' * (20 - (i // 5))
-        sys.stdout.write(f"\r\033[1m\033[93mInternet Check: \033[96m[{bar}] {i}%\033[0m")
-        sys.stdout.flush()
-        
-    t.join()
-    sys.stdout.write("\n\n")
-    return result[0]
 
 def get_ipv6():
     try:
@@ -130,9 +103,10 @@ def fetch_data(silent=False, full_refresh=True, existing_data=None):
     
     if not silent:
         print_welcome()
-        data['is_connected'] = check_internet_with_progress()
-    else:
-        data['is_connected'] = check_internet()
+        sys.stdout.write("\033[1m\033[93mChecking Internet Connection...\033[0m\n")
+        sys.stdout.flush()
+    
+    data['is_connected'] = check_internet()
 
     if data['is_connected']:
         wifi_ps = "$wlan = netsh wlan show interfaces; $ssid = ''; $band = ''; if ($wlan -match 'SSID\\s*:\\s*([^\\r\\n]+)') { $ssid = $matches[1].Trim() }; if ($wlan -match 'Band\\s*:\\s*([^\\r\\n]+)') { $band = $matches[1].Trim() }; if ($ssid) { Write-Output \"$ssid ($band)\" } else { Write-Output 'Ethernet / No Wi-Fi' }"
@@ -142,7 +116,7 @@ def fetch_data(silent=False, full_refresh=True, existing_data=None):
 
     if full_refresh:
         if not silent:
-            sys.stdout.write("\033[1m\033[96mFetching Data...\033[0m\n")
+            sys.stdout.write("\033[1m\033[96mFetching Local System Data...\033[0m\n")
             sys.stdout.flush()
 
         data['login_time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -251,26 +225,26 @@ def deployment_menu():
         
         choice = input("\033[1m\033[96mChoice: \033[0m")
         if choice == '1':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: OSReinstall (Mounts ISO and triggers Windows setup)...\033[0m\n")
             iso_path = input("\033[96mISO Path: \033[0m").strip()
             if os.path.exists(iso_path):
                 os.system(f'powershell "Mount-DiskImage -ImagePath \'{iso_path}\' -PassThru | Get-Volume | % {{ & ($_.DriveLetter + \':\\setup.exe\') /auto upgrade /quiet }}"')
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: AppInstall (Silently installs a selected EXE application)...\033[0m\n")
             app_path = input("\033[96mEXE Path: \033[0m").strip()
             if os.path.exists(app_path):
                 os.system(f'"{app_path}" /S /v /qn')
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Activator (Runs the Microsoft licensing activator script)...\033[0m\n")
             os.system('powershell -c "iwr \'https://microsoft.com\' -OutFile $env:TEMP\\a.cmd; & $env:TEMP\\a.cmd"')
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Chrome (Installs Google Chrome silently via Winget)...\033[0m\n")
             os.system("winget install Google.Chrome -e --accept-package-agreements --accept-source-agreements --silent")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
@@ -286,19 +260,19 @@ def setup_menu():
         print("\033[93m1. \033[97mMSLogin\033[0m")
         print("\033[93m2. \033[97mBackupD\033[0m")
         print("\033[93m3. \033[97mBranding\033[0m")
-        print("\033[93m4. \033[97mLoginBanner\033[0m")
+        print("\033[93m4. \033[97mBanner\033[0m")
         print("\033[91m0. \033[97mBack\033[0m")
         print("\033[1m\033[95m" + "="*70 + "\033[0m")
         
         choice = input("\033[1m\033[96mChoice: \033[0m")
         if choice == '1':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: MSLogin (Opens Windows Work/School account setup and OneDrive)...\033[0m\n")
             os.system("start ms-settings:workplace")
             time.sleep(1)
             os.system("start onedrive")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BackupD (Creates a symbolic link from D: drive to OneDrive)...\033[0m\n")
             od_path = os.path.join(os.environ['USERPROFILE'], 'OneDrive')
             if os.path.exists(od_path) and os.path.exists("D:\\"):
                 os.system(f'mklink /J "{od_path}\\Drive_D_Backup" "D:\\"')
@@ -307,7 +281,7 @@ def setup_menu():
                 print("\n\033[1m\033[91m[X] Failed\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Branding (Applies corporate wallpaper and lock screen images)...\033[0m\n")
             img_path = input("\033[96mImage Path: \033[0m").strip()
             c_name = input("\033[96mCompany Name: \033[0m").strip()
             if os.path.exists(img_path):
@@ -319,7 +293,7 @@ def setup_menu():
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Banner (Sets a legal notice banner and renames PC)...\033[0m\n")
             emp_id = input("\033[96mEmp ID/Name: \033[0m").strip()
             os.system(f'reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v legalnoticecaption /t REG_SZ /d "Assigned To:" /f')
             os.system(f'reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v legalnoticetext /t REG_SZ /d "{emp_id}" /f')
@@ -347,39 +321,39 @@ def restrictions_menu():
         
         choice = input("\033[1m\033[96mChoice: \033[0m")
         if choice == '1':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: UpdateApps (Upgrades all installed applications using Winget)...\033[0m\n")
             os.system("winget upgrade --all --silent --accept-package-agreements --accept-source-agreements")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: UpdateDrivers (Triggers Windows Update to install missing drivers)...\033[0m\n")
             os.system("UsoClient ScanInstallWait")
             print("\n\033[1m\033[92m[✓] Started\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: RemoteAssist (Launches Windows Quick Assist for remote support)...\033[0m\n")
             os.system("start quickassist")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: DropAdmin (Removes specified user from the local Administrators group)...\033[0m\n")
             usr = input("\033[96mUsername to drop: \033[0m").strip()
             os.system(f'net localgroup administrators "{usr}" /delete')
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '5':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BlockApps (Modifies registry to disable user installations via MSI)...\033[0m\n")
             os.system('reg add "HKLM\\Software\\Policies\\Microsoft\\Windows\\Installer" /v DisableUserInstalls /t REG_DWORD /d 1 /f')
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '6':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BlockUSBBT (Disables USB storage services and Bluetooth)...\033[0m\n")
             os.system('reg add "HKLM\\SYSTEM\\CurrentControlSet\\Services\\USBSTOR" /v Start /t REG_DWORD /d 4 /f')
             os.system("sc config bthserv start= disabled")
             os.system("net stop bthserv")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '7':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: RestrictOS (Disables CMD, Control Panel, Registry Editor, and Browser Extensions)...\033[0m\n")
             os.system('reg add "HKCU\\Software\\Policies\\Microsoft\\Windows\\System" /v DisableCMD /t REG_DWORD /d 2 /f')
             os.system('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer" /v NoControlPanel /t REG_DWORD /d 1 /f')
             os.system('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v DisableRegistryTools /t REG_DWORD /d 1 /f')
@@ -395,7 +369,7 @@ def offboarding_menu():
     confirm = input("\033[93mProceed? (Y/N): \033[0m").strip().lower()
     if confirm == 'y' or confirm == 'yes':
         usr = input("\033[96mTarget Username: \033[0m").strip()
-        print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+        print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Wipe (Terminates OneDrive, deletes browser data, and disables user account)...\033[0m\n")
         os.system("taskkill /f /im onedrive.exe")
         os.system(f'rmdir /s /q "C:\\Users\\{usr}\\AppData\\Local\\Google\\Chrome\\User Data"')
         os.system(f'rmdir /s /q "C:\\Users\\{usr}\\AppData\\Local\\Microsoft\\Edge\\User Data"')
@@ -425,6 +399,7 @@ def bbipl_admin_menu(data):
         
         if choice == '1':
             os.system('cls' if os.name == 'nt' else 'clear')
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: SystemInfo (Displays complete system hardware and software details)...\033[0m\n")
             print("\n\033[1m\033[95m" + "="*70 + "\033[0m")
             print("\033[1m\033[97m             SYSTEM INFORMATION             \033[0m")
             print("\033[1m\033[95m" + "="*70 + "\033[0m\n")
@@ -500,22 +475,23 @@ def help_menu():
     print("\033[96mBattery:\033[0m Generate powercfg report.")
 
     print("\n\033[1m\033[93m[BBIPL Admin]\033[0m")
-    print("\033[96mOSReinstall:\033[0m Mount ISO and run setup.")
-    print("\033[96mAppInstall:\033[0m Silent EXE install.")
-    print("\033[96mActivator:\033[0m Run licensing script.")
-    print("\033[96mChrome:\033[0m Winget install Chrome.")
-    print("\033[96mMSLogin:\033[0m Open workplace settings.")
-    print("\033[96mBackupD:\033[0m Symlink D drive to OneDrive.")
-    print("\033[96mBranding:\033[0m Apply wallpaper/OEM details.")
-    print("\033[96mLoginBanner:\033[0m Set lockscreen notice.")
-    print("\033[96mUpdateApps:\033[0m Winget upgrade all.")
-    print("\033[96mUpdateDrivers:\033[0m Trigger Windows Update.")
-    print("\033[96mRemoteAssist:\033[0m Launch Quick Assist.")
-    print("\033[96mDropAdmin:\033[0m Remove user from admin group.")
-    print("\033[96mBlockApps:\033[0m Disable MSI installs.")
-    print("\033[96mBlockUSBBT:\033[0m Disable USBSTOR and Bluetooth.")
-    print("\033[96mRestrictOS:\033[0m Lock Control Panel, Regedit, CMD.")
-    print("\033[96mOffboarding:\033[0m Wipe data and lock account.")
+    print("\033[96mSystemInfo:\033[0m Displays complete system hardware and software details.")
+    print("\033[96mOSReinstall:\033[0m Mounts ISO and triggers Windows setup.")
+    print("\033[96mAppInstall:\033[0m Silently installs a selected EXE application.")
+    print("\033[96mActivator:\033[0m Runs the Microsoft licensing activator script.")
+    print("\033[96mChrome:\033[0m Installs Google Chrome silently via Winget.")
+    print("\033[96mMSLogin:\033[0m Opens Windows Work/School account setup and OneDrive.")
+    print("\033[96mBackupD:\033[0m Creates a symbolic link from D: drive to OneDrive.")
+    print("\033[96mBranding:\033[0m Applies corporate wallpaper and lock screen images.")
+    print("\033[96mBanner:\033[0m Sets a legal notice banner and renames PC based on Emp ID.")
+    print("\033[96mUpdateApps:\033[0m Upgrades all installed applications using Winget.")
+    print("\033[96mUpdateDrivers:\033[0m Triggers Windows Update to install missing drivers.")
+    print("\033[96mRemoteAssist:\033[0m Launches Windows Quick Assist for remote support.")
+    print("\033[96mDropAdmin:\033[0m Removes specified user from the local Administrators group.")
+    print("\033[96mBlockApps:\033[0m Modifies registry to disable user installations via MSI.")
+    print("\033[96mBlockUSBBT:\033[0m Disables USB storage services and Bluetooth.")
+    print("\033[96mRestrictOS:\033[0m Disables CMD, Control Panel, Registry Editor, and Browser Extensions.")
+    print("\033[96mOffboarding:\033[0m Terminates OneDrive, deletes browser data, and disables user account.")
     
     print("\033[1m\033[95m" + "="*70 + "\033[0m")
     input("\n\033[90mEnter to return...\033[0m")
@@ -539,7 +515,7 @@ def security_hardware_menu():
         choice = input("\033[1m\033[96mChoice: \033[0m")
         
         if choice == '1':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Antivirus (Checks the active status of Windows Defender or third-party AV)...\033[0m\n")
             av_status = run_cmd('powershell "Get-CimInstance -Namespace root\\SecurityCenter2 -Class AntivirusProduct | Select-Object -ExpandProperty displayName"')
             if av_status and "N/A" not in av_status:
                 print(f"\033[92mDetected: {av_status}\033[0m")
@@ -547,27 +523,27 @@ def security_hardware_menu():
                 print("\033[91mNot Found.\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Firewall (Audits the current status of Windows Firewall profiles)...\033[0m\n")
             os.system("netsh advfirewall show allprofiles")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: MalwareScan (Launches the Malicious Software Removal Tool)...\033[0m\n")
             os.system("start mrt")
             print("\033[1m\033[92m[✓] Started\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: DriveHealth (Checks the S.M.A.R.T. health status of storage drives)...\033[0m\n")
             os.system("wmic diskdrive get model,status")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '5':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Peripherals (Audits the status of Network, Audio, Camera, and Display devices)...\033[0m\n")
             os.system('powershell "Get-NetAdapter | Select-Object Name, Status"')
             os.system('powershell "Get-PnpDevice -Class Camera, AudioEndpoint | Select-Object Status, Class, FriendlyName"')
             os.system('wmic path Win32_VideoController get Name, Status')
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '6':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Uptime (Displays the system uptime since the last reboot)...\033[0m\n")
             os.system("net statistics workstation")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
@@ -575,7 +551,7 @@ def security_hardware_menu():
             print("\n\033[93mSave Battery Report? (Y/N)\033[0m")
             save_choice = input("\033[1m\033[96mChoice: \033[0m").strip().lower()
             if save_choice == 'y' or save_choice == 'yes':
-                print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Battery (Generates and saves a detailed Battery Health Report)...\033[0m\n")
                 report_path = os.path.join(os.environ['USERPROFILE'], 'Desktop', 'Battery_Report.html')
                 os.system(f'powercfg /batteryreport /output "{report_path}"')
                 print(f"\n\033[1m\033[92m[✓] Saved: {report_path}\033[0m")
@@ -604,42 +580,42 @@ def internet_fixer_menu():
         choice = input("\033[1m\033[96mChoice: \033[0m")
         
         if choice == '1':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Flush (Clears the DNS resolver cache)...\033[0m\n")
             os.system("ipconfig /flushdns")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: ResetWinsock (Resets Windows Sockets configuration)...\033[0m\n")
             os.system("netsh winsock reset")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: ResetIP (Resets TCP/IP stack configuration)...\033[0m\n")
             os.system("netsh int ip reset")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Ping (Tests internet connectivity by pinging Google)...\033[0m\n")
             os.system("ping google.com")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '5':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Trace (Traces the network route to Google to detect drops)...\033[0m\n")
             os.system("tracert google.com")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '6':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Speed (Displays the active network adapter's link speed)...\033[0m\n")
             os.system("wmic nic where \"NetEnabled='true'\" get name, Speed")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '7':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Traffic (Lists all active network connections and listening ports)...\033[0m\n")
             os.system("netstat -ab")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '8':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Repair (Executes a complete suite of network reset and repair tools)...\033[0m\n")
             os.system("ipconfig /flushdns")
             os.system("netsh winsock reset")
             os.system("netsh int ip reset")
@@ -647,7 +623,7 @@ def internet_fixer_menu():
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '9':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Gigabit (Opens Network Connections to manually configure 1Gbps duplex)...\033[0m\n")
             os.system("start ncpa.cpl")
             print("\033[96mSet Adapter Properties > Advanced > Speed & Duplex > 1.0 Gbps\033[0m\n")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
@@ -685,12 +661,12 @@ def health_checkup_menu():
         choice = input("\033[1m\033[96mChoice: \033[0m")
         
         if choice == '1':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Scan (Scans the file system for logical disk errors using CHKDSK)...\033[0m\n")
             os.system("chkdsk C: /scan")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Purge (Cleans up recycle bin and temporary files)...\033[0m\n")
             os.system("powershell -Command \"Clear-RecycleBin -Force -ErrorAction SilentlyContinue\"")
             os.system("powershell -Command \"Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue\"")
             os.system("powershell -Command \"Remove-Item -Path 'C:\\Windows\\Temp\\*' -Recurse -Force -ErrorAction SilentlyContinue\"")
@@ -698,23 +674,23 @@ def health_checkup_menu():
             print("\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Optimize (Cleans up the Windows component store using DISM)...\033[0m\n")
             os.system("dism /online /cleanup-image /startcomponentcleanup")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Cleanup (Runs the advanced disk cleanup utility)...\033[0m\n")
             os.system("cleanmgr /sagerun:1 | cleanmgr /verylowdisk")
             fake_progress_bar(3.0, "Cleanup")
             print("\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '5':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Verify (Scans and repairs corrupted system files using SFC)...\033[0m\n")
             os.system("sfc /scannow")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '6':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Diagnostic (Runs a full suite of health, cleaning, and integrity checks)...\033[0m\n")
             os.system("chkdsk C: /scan")
             os.system("powershell -Command \"Clear-RecycleBin -Force -ErrorAction SilentlyContinue\"")
             os.system("powershell -Command \"Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue\"")
@@ -724,12 +700,12 @@ def health_checkup_menu():
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '7':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Monitor (Opens the Windows Reliability Monitor to check crash logs)...\033[0m\n")
             os.system("start perfmon /rel")
             print("\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '8':
-            print("\n\033[1m\033[93m[>>>] Running...\033[0m\n")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Reboot (Initiates a system reboot in 15 seconds)...\033[0m\n")
             os.system("shutdown /r /t 15")
             print("\033[1m\033[92m[✓] Rebooting in 15s\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
