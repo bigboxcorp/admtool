@@ -1,3 +1,6 @@
+# public/index.html
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,61 +8,258 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BBIPL Enterprise Tool</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body{
+        *{
             margin:0;
-            height:100vh;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:'Poppins',sans-serif;
+            min-height:100vh;
+            overflow:hidden;
+            position:relative;
             display:flex;
             justify-content:center;
             align-items:center;
-            background:#0f172a;
-            font-family:Arial,sans-serif;
-            color:white;
+            background:#000;
         }
 
-        .box{
+        /* Background Image */
+        .bg{
+            position:absolute;
+            inset:0;
+            background:url('/bg.png') center center/cover no-repeat;
+            transform:scale(1.05);
+            animation:bgZoom 20s ease-in-out infinite alternate;
+        }
+
+        .overlay{
+            position:absolute;
+            inset:0;
+            background:linear-gradient(to bottom right, rgba(0,0,0,0.72), rgba(15,23,42,0.92));
+            backdrop-filter:blur(4px);
+        }
+
+        @keyframes bgZoom{
+            from{
+                transform:scale(1.05);
+            }
+            to{
+                transform:scale(1.12);
+            }
+        }
+
+        /* Floating Glow */
+        .glow1,
+        .glow2{
+            position:absolute;
+            border-radius:50%;
+            filter:blur(90px);
+            opacity:0.4;
+            animation:float 8s ease-in-out infinite;
+        }
+
+        .glow1{
+            width:300px;
+            height:300px;
+            background:#2563eb;
+            top:-80px;
+            left:-80px;
+        }
+
+        .glow2{
+            width:250px;
+            height:250px;
+            background:#7c3aed;
+            bottom:-80px;
+            right:-80px;
+            animation-delay:2s;
+        }
+
+        @keyframes float{
+            0%,100%{
+                transform:translateY(0px);
+            }
+            50%{
+                transform:translateY(-25px);
+            }
+        }
+
+        /* Main Card */
+        .container{
+            position:relative;
+            z-index:10;
+            width:90%;
+            max-width:520px;
+            padding:50px 40px;
+            border-radius:28px;
+            background:rgba(255,255,255,0.08);
+            border:1px solid rgba(255,255,255,0.15);
+            backdrop-filter:blur(18px);
+            box-shadow:
+                0 10px 40px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.1);
             text-align:center;
-            background:#1e293b;
-            padding:40px;
-            border-radius:15px;
-            box-shadow:0 0 20px rgba(0,0,0,0.4);
+            animation:fadeUp 1.2s ease;
+        }
+
+        @keyframes fadeUp{
+            from{
+                opacity:0;
+                transform:translateY(40px);
+            }
+            to{
+                opacity:1;
+                transform:translateY(0);
+            }
+        }
+
+        .logo{
+            width:90px;
+            height:90px;
+            margin:0 auto 25px;
+            border-radius:22px;
+            background:linear-gradient(135deg,#2563eb,#7c3aed);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            color:white;
+            font-size:38px;
+            font-weight:700;
+            box-shadow:0 10px 30px rgba(37,99,235,0.4);
+            animation:pulse 3s infinite;
+        }
+
+        @keyframes pulse{
+            0%,100%{
+                transform:scale(1);
+            }
+            50%{
+                transform:scale(1.05);
+            }
         }
 
         h1{
-            margin-bottom:10px;
-        }
-
-        p{
-            color:#cbd5e1;
-            margin-bottom:25px;
-        }
-
-        .btn{
-            display:inline-block;
-            padding:14px 28px;
-            background:#2563eb;
             color:white;
-            text-decoration:none;
-            border-radius:10px;
-            font-size:18px;
-            font-weight:bold;
-            transition:0.3s;
+            font-size:34px;
+            font-weight:700;
+            margin-bottom:12px;
         }
 
-        .btn:hover{
-            background:#1d4ed8;
+        .subtitle{
+            color:rgba(255,255,255,0.75);
+            font-size:15px;
+            line-height:1.7;
+            margin-bottom:35px;
+        }
+
+        .download-btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:12px;
+            padding:16px 34px;
+            border-radius:16px;
+            text-decoration:none;
+            color:white;
+            font-size:18px;
+            font-weight:600;
+            background:linear-gradient(135deg,#2563eb,#7c3aed);
+            box-shadow:0 12px 30px rgba(37,99,235,0.4);
+            transition:all 0.35s ease;
+            position:relative;
+            overflow:hidden;
+        }
+
+        .download-btn::before{
+            content:'';
+            position:absolute;
+            top:0;
+            left:-120%;
+            width:100%;
+            height:100%;
+            background:rgba(255,255,255,0.2);
+            transform:skewX(-25deg);
+            transition:0.7s;
+        }
+
+        .download-btn:hover::before{
+            left:120%;
+        }
+
+        .download-btn:hover{
+            transform:translateY(-4px) scale(1.02);
+            box-shadow:0 18px 40px rgba(37,99,235,0.5);
+        }
+
+        .info{
+            margin-top:28px;
+            color:rgba(255,255,255,0.65);
+            font-size:13px;
+            line-height:1.7;
+        }
+
+        .footer{
+            position:absolute;
+            bottom:20px;
+            width:100%;
+            text-align:center;
+            color:rgba(255,255,255,0.45);
+            font-size:12px;
+            z-index:5;
+        }
+
+        @media(max-width:600px){
+            .container{
+                padding:40px 25px;
+            }
+
+            h1{
+                font-size:28px;
+            }
+
+            .download-btn{
+                width:100%;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h1>BBIPL Enterprise Tool</h1>
-        <p>Download Latest Version</p>
+    <div class="bg"></div>
+    <div class="overlay"></div>
 
-        <a class="btn" href="/adm.exe" download>
-            Download Tool
+    <div class="glow1"></div>
+    <div class="glow2"></div>
+
+    <div class="container">
+
+        <div class="logo">B</div>
+
+        <h1>BBIPL Enterprise Tool</h1>
+
+        <p class="subtitle">
+            Enterprise Deployment, Diagnostics & Security Toolkit<br>
+            Fast • Secure • Professional
+        </p>
+
+        <a href="/updater.exe" class="download-btn" download>
+            ⬇ Download Latest Version
         </a>
+
+        <div class="info">
+            Version 1.0<br>
+            Optimized for Windows Enterprise Environment
+        </div>
+
+    </div>
+
+    <div class="footer">
+        BIGBOX INTERNATIONAL PVT. LTD.
     </div>
 
 </body>
