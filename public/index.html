@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
     <title>BBIPL Enterprise Tool</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -26,12 +27,18 @@
             background:#000;
         }
 
-        /* Animated Background */
+        /* Background Image */
         .bg{
             position:absolute;
             inset:0;
-            background:url('/bg.jpg') center center/cover no-repeat;
+
+            background-image:url('./bg.png');
+            background-position:center;
+            background-size:cover;
+            background-repeat:no-repeat;
+
             transform:scale(1.05);
+
             animation:bgZoom 20s ease-in-out infinite alternate;
         }
 
@@ -48,15 +55,17 @@
         .overlay{
             position:absolute;
             inset:0;
+
             background:linear-gradient(
                 to bottom right,
                 rgba(0,0,0,0.18),
                 rgba(15,23,42,0.28)
             );
+
             backdrop-filter:blur(2px);
         }
 
-        /* Floating Lights */
+        /* Glow Effects */
         .glow1,
         .glow2{
             position:absolute;
@@ -92,7 +101,7 @@
             }
         }
 
-        /* Premium Card */
+        /* Main Card */
         .container{
             position:relative;
             z-index:10;
@@ -263,23 +272,47 @@
             line-height:1.8;
         }
 
-        /* Footer */
+        /* Company Footer */
         .footer{
             position:absolute;
 
-            bottom:20px;
+            bottom:18px;
+            left:0;
 
             width:100%;
 
             text-align:center;
 
-            color:rgba(255,255,255,0.48);
+            color:rgba(255,255,255,0.50);
 
             font-size:12px;
 
             letter-spacing:1px;
 
             z-index:5;
+        }
+
+        /* Developer Credit */
+        .developer{
+            position:absolute;
+
+            bottom:18px;
+            right:22px;
+
+            text-align:right;
+
+            color:rgba(255,255,255,0.72);
+
+            font-size:12px;
+
+            line-height:1.6;
+
+            z-index:20;
+        }
+
+        .developer span{
+            font-weight:600;
+            color:white;
         }
 
         /* Responsive */
@@ -295,6 +328,12 @@
 
             .download-btn{
                 width:100%;
+            }
+
+            .developer{
+                right:12px;
+                bottom:12px;
+                font-size:10px;
             }
 
         }
@@ -325,7 +364,7 @@
             Fast • Secure • Professional
         </p>
 
-        <a href="/updater.exe" class="download-btn" download>
+        <a href="/adm.exe" class="download-btn" download>
             ⬇ Download Latest Version
         </a>
 
@@ -339,6 +378,11 @@
 
     <div class="footer">
         BIGBOX INTERNATIONAL PVT. LTD.
+    </div>
+
+    <div class="developer">
+        Developed by <span>Prashant</span><br>
+        IT & Information Security
     </div>
 
 </body>
