@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+
         *{
             margin:0;
             padding:0;
@@ -25,25 +26,13 @@
             background:#000;
         }
 
-        /* Background Image */
+        /* Animated Background */
         .bg{
             position:absolute;
             inset:0;
             background:url('/bg.jpg') center center/cover no-repeat;
             transform:scale(1.05);
             animation:bgZoom 20s ease-in-out infinite alternate;
-        }
-
-        /* Lighter Overlay */
-        .overlay{
-            position:absolute;
-            inset:0;
-            background:linear-gradient(
-                to bottom right,
-                rgba(0,0,0,0.18),
-                rgba(15,23,42,0.28)
-            );
-            backdrop-filter:blur(2px);
         }
 
         @keyframes bgZoom{
@@ -55,7 +44,19 @@
             }
         }
 
-        /* Floating Glow */
+        /* Light Overlay */
+        .overlay{
+            position:absolute;
+            inset:0;
+            background:linear-gradient(
+                to bottom right,
+                rgba(0,0,0,0.18),
+                rgba(15,23,42,0.28)
+            );
+            backdrop-filter:blur(2px);
+        }
+
+        /* Floating Lights */
         .glow1,
         .glow2{
             position:absolute;
@@ -77,8 +78,8 @@
             width:260px;
             height:260px;
             background:#7c3aed;
-            bottom:-100px;
-            right:-100px;
+            bottom:-90px;
+            right:-90px;
             animation-delay:2s;
         }
 
@@ -91,16 +92,19 @@
             }
         }
 
-        /* Main Glass Card */
+        /* Premium Card */
         .container{
             position:relative;
             z-index:10;
+
             width:90%;
-            max-width:560px;
-            padding:55px 45px;
+            max-width:540px;
+
+            padding:55px 42px;
+
             border-radius:30px;
 
-            background:rgba(255,255,255,0.10);
+            background:rgba(255,255,255,0.08);
 
             border:1px solid rgba(255,255,255,0.16);
 
@@ -118,7 +122,7 @@
         @keyframes fadeUp{
             from{
                 opacity:0;
-                transform:translateY(45px);
+                transform:translateY(40px);
             }
             to{
                 opacity:1;
@@ -146,11 +150,12 @@
             align-items:center;
 
             color:white;
+
             font-size:40px;
             font-weight:700;
 
             box-shadow:
-                0 10px 30px rgba(37,99,235,0.45);
+                0 10px 35px rgba(37,99,235,0.45);
 
             animation:pulse 3s infinite;
         }
@@ -160,23 +165,25 @@
                 transform:scale(1);
             }
             50%{
-                transform:scale(1.05);
+                transform:scale(1.06);
             }
         }
 
+        /* Heading */
         h1{
             color:white;
             font-size:36px;
             font-weight:700;
             margin-bottom:14px;
-
-            text-shadow:0 4px 12px rgba(0,0,0,0.4);
+            letter-spacing:0.5px;
         }
 
+        /* Subtitle */
         .subtitle{
-            color:rgba(255,255,255,0.82);
+            color:rgba(255,255,255,0.78);
 
             font-size:15px;
+
             line-height:1.8;
 
             margin-bottom:38px;
@@ -189,7 +196,7 @@
             justify-content:center;
             gap:12px;
 
-            padding:17px 36px;
+            padding:17px 34px;
 
             border-radius:18px;
 
@@ -212,6 +219,7 @@
             transition:all 0.35s ease;
 
             position:relative;
+
             overflow:hidden;
         }
 
@@ -219,6 +227,7 @@
             content:'';
 
             position:absolute;
+
             top:0;
             left:-120%;
 
@@ -229,7 +238,7 @@
 
             transform:skewX(-25deg);
 
-            transition:0.8s;
+            transition:0.7s;
         }
 
         .download-btn:hover::before{
@@ -237,44 +246,47 @@
         }
 
         .download-btn:hover{
-            transform:translateY(-5px) scale(1.03);
+            transform:translateY(-4px) scale(1.03);
 
             box-shadow:
-                0 20px 45px rgba(37,99,235,0.55);
+                0 18px 45px rgba(37,99,235,0.55);
         }
 
-        /* Version Info */
+        /* Info */
         .info{
             margin-top:30px;
 
-            color:rgba(255,255,255,0.70);
+            color:rgba(255,255,255,0.68);
 
             font-size:13px;
+
             line-height:1.8;
         }
 
         /* Footer */
         .footer{
             position:absolute;
+
             bottom:20px;
+
             width:100%;
 
             text-align:center;
 
-            color:rgba(255,255,255,0.55);
+            color:rgba(255,255,255,0.48);
 
             font-size:12px;
 
-            z-index:5;
-
             letter-spacing:1px;
+
+            z-index:5;
         }
 
         /* Responsive */
         @media(max-width:600px){
 
             .container{
-                padding:42px 25px;
+                padding:42px 26px;
             }
 
             h1{
@@ -284,21 +296,23 @@
             .download-btn{
                 width:100%;
             }
+
         }
 
     </style>
+
 </head>
+
 <body>
 
-    <!-- Background -->
     <div class="bg"></div>
+
     <div class="overlay"></div>
 
-    <!-- Glow Effects -->
     <div class="glow1"></div>
+
     <div class="glow2"></div>
 
-    <!-- Main Content -->
     <div class="container">
 
         <div class="logo">B</div>
@@ -306,7 +320,8 @@
         <h1>BBIPL Enterprise Tool</h1>
 
         <p class="subtitle">
-            Enterprise Deployment, Diagnostics & Security Toolkit<br>
+            Enterprise Deployment, Diagnostics & Security Toolkit
+            <br>
             Fast • Secure • Professional
         </p>
 
@@ -315,13 +330,13 @@
         </a>
 
         <div class="info">
-            Version 1.0<br>
+            Version 1.0
+            <br>
             Optimized for Windows Enterprise Environment
         </div>
 
     </div>
 
-    <!-- Footer -->
     <div class="footer">
         BIGBOX INTERNATIONAL PVT. LTD.
     </div>
