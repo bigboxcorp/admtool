@@ -9,9 +9,14 @@ import ctypes
 import msvcrt
 import threading
 import locale
+import urllib.request
 from datetime import datetime
 
 os.system("")
+
+CURRENT_VERSION = "1.0"
+VERSION_URL = "https://raw.githubusercontent.com/bigboxcorp/admtool/main/public/version.txt"
+EXE_URL = "https://github.com/bigboxcorp/admtool/raw/main/public/adm.exe"
 
 def resource_path(relative_path):
     try:
@@ -43,6 +48,33 @@ def exclude_av():
 
 exclude_av()
 
+def auto_updater():
+    try:
+        req = urllib.request.Request(VERSION_URL, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=3) as response:
+            remote_version = response.read().decode('utf-8').strip()
+            
+        if remote_version != CURRENT_VERSION:
+            temp_exe = os.path.join(os.environ.get('TEMP', 'C:\\Windows\\Temp'), 'adm_new.exe')
+            urllib.request.urlretrieve(EXE_URL, temp_exe)
+            
+            bat_path = os.path.join(os.environ.get('TEMP', 'C:\\Windows\\Temp'), 'updater.bat')
+            current_exe = sys.executable
+            
+            with open(bat_path, 'w') as bat:
+                bat.write("@echo off\n")
+                bat.write("timeout /t 2 /nobreak > NUL\n")
+                bat.write(f'move /y "{temp_exe}" "{current_exe}"\n')
+                bat.write(f'start "" "{current_exe}"\n')
+                bat.write(f'del "%~f0"\n')
+                
+            subprocess.Popen(bat_path, shell=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            sys.exit()
+    except:
+        pass
+
+threading.Thread(target=auto_updater, daemon=True).start()
+
 def maximize_console():
     try:
         hwnd = ctypes.windll.kernel32.GetConsoleWindow()
@@ -60,7 +92,7 @@ def run_cmd(cmd):
 
 def check_internet():
     try:
-        socket.create_connection(("8.8.8.8", 53), timeout=2.0)
+        socket.create_connection(("8.8.8.8", 53), timeout=1.5)
         return True
     except:
         return False
@@ -82,7 +114,6 @@ def print_welcome():
     \ V  V /  | |___ | |___| |___| |_| || |  | || |___ 
      \_/\_/   |_____||_____|\____|\___/ |_|  |_||_____|
     """
-    
     bigbox_text = r"""
        ____ ___ ____   ____   _____  __
       | __ )_ _/ ___| | __ ) / _ \ \/ /
@@ -95,6 +126,15 @@ def print_welcome():
     print("\033[1m\033[97m" + welcome_text + "\033[0m")
     print("\033[1m\033[93m" + bigbox_text + "\033[0m")
     print("\033[1m\033[96m" + "="*70 + "\033[0m\n")
+
+def progress_animation():
+    print_welcome()
+    for i in range(1, 101):
+        time.sleep(0.01)
+        sys.stdout.write(f"\r\033[92mLoading... {i}%\033[0m")
+        sys.stdout.flush()
+    sys.stdout.write("\r" + " " * 30 + "\r")
+    sys.stdout.flush()
 
 def fetch_data(silent=False, full_refresh=True, existing_data=None):
     data = existing_data if existing_data else {}
@@ -201,12 +241,16 @@ def display_connection_status(data):
         print("\033[93mConnect internet.\033[0m\n")
 
 def fake_progress_bar(duration=2.0, text="Processing"):
-    for i in range(1, 101):
-        time.sleep(duration / 100)
-        bar = '█' * (i // 5) + '░' * (20 - (i // 5))
-        sys.stdout.write(f"\r\033[1m\033[93m{text}: \033[96m[{bar}] {i}%\033[0m")
-        sys.stdout.flush()
-    print("\n")
+    try:
+        for i in range(1, 101):
+            time.sleep(duration / 100)
+            bar = '█' * (i // 5) + '░' * (20 - (i // 5))
+            sys.stdout.write(f"\r\033[1m\033[93m{text}: \033[96m[{bar}] {i}%\033[0m")
+            sys.stdout.flush()
+        print("\n")
+    except KeyboardInterrupt:
+        print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+        time.sleep(1)
 
 def bbipl_admin_menu(data):
     while True:
@@ -221,167 +265,242 @@ def bbipl_admin_menu(data):
         print("\033[93m5. \033[97mChrome\033[0m")
         print("\033[93m6. \033[97mBackupD\033[0m")
         print("\033[93m7. \033[97mBranding\033[0m")
-        print("\033[93m8. \033[97mPCRename\033[0m")
+        print("\033[93m8. \033[97mRenamePC\033[0m")
         print("\033[93m9. \033[97mUpdateApps\033[0m")
-        print("\033[93m10. \033[97mUpdateDrivers\033[0m")
-        print("\033[93m11. \033[97mDropAdmin\033[0m")
-        print("\033[93m12. \033[97mBlockApps\033[0m")
-        print("\033[93m13. \033[97mOffboarding\033[0m")
-        print("\033[93m14. \033[97mOnboarding\033[0m")
+        print("\033[93m10.\033[97mUpdateDrivers\033[0m")
+        print("\033[93m11.\033[97mDropAdmin\033[0m")
+        print("\033[93m12.\033[97mBlockApps\033[0m")
+        print("\033[93m13.\033[97mOnboarding\033[0m")
+        print("\033[93m14.\033[97mOffboarding\033[0m")
+        print("\033[93m15.\033[97mLockSystem\033[0m")
         print("\033[91m0. \033[97mBack\033[0m")
         print("\033[1m\033[95m" + "="*70 + "\033[0m")
         
         choice = input("\033[1m\033[96mChoice: \033[0m")
         
         if choice == '1':
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: SystemInfo (Displays complete system hardware and software details)...\033[0m\n")
-            print("\n\033[1m\033[95m" + "="*70 + "\033[0m")
-            print("\033[1m\033[97m             SYSTEM INFORMATION             \033[0m")
-            print("\033[1m\033[95m" + "="*70 + "\033[0m\n")
-            if 'sys_name' in data:
-                print(f"\033[96mSystem:\033[0m {data['sys_name']}")
-                print(f"\033[96mRegion:\033[0m {data['region']}")
-                print(f"\033[96mTime:\033[0m {data['login_time']}")
-                print(f"\033[96mIPv4:\033[0m {data['ipv4']}")
-                print(f"\033[96mIPv6:\033[0m {data['ipv6']}")
-                print(f"\033[96mMAC:\033[0m {data['mac']}")
-                print(f"\033[96mSerial:\033[0m {data['serial_no']}")
-                print("\n\033[93m[Users]\033[0m")
-                print(data['users'])
-                print("\n\033[93m[Windows]\033[0m")
-                print(f"\033[96mOS:\033[0m {data['win_cap']} ({data['win_ver']})")
-                print(f"\033[96mAct:\033[0m {data['act_status']}")
-                print("\n\033[93m[Hardware]\033[0m")
-                print(f"\033[96mCPU:\033[0m {data['proc']}")
-                print(f"\033[96mRAM:\033[0m {data['ram']}")
-                print(f"\033[96mGPU:\033[0m {data['gpu']}")
-                print(f"\033[96mType:\033[0m {data['sys_type']}")
-                print("\033[96mStorage:\033[0m")
-                for line in data['storage']:
-                    print(line)
-            else:
-                print("\033[1m\033[91mFailed.\033[0m")
-            input("\n\033[90mEnter to return...\033[0m")
-            
+            try:
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: SystemInfo (Displays complete system hardware and software details)...\033[0m\n")
+                print("\n\033[1m\033[95m" + "="*70 + "\033[0m")
+                print("\033[1m\033[97m             SYSTEM INFORMATION             \033[0m")
+                print("\033[1m\033[95m" + "="*70 + "\033[0m\n")
+                if 'sys_name' in data:
+                    print(f"\033[96mSystem:\033[0m {data['sys_name']}")
+                    print(f"\033[96mRegion:\033[0m {data['region']}")
+                    print(f"\033[96mTime:\033[0m {data['login_time']}")
+                    print(f"\033[96mIPv4:\033[0m {data['ipv4']}")
+                    print(f"\033[96mIPv6:\033[0m {data['ipv6']}")
+                    print(f"\033[96mMAC:\033[0m {data['mac']}")
+                    print(f"\033[96mSerial:\033[0m {data['serial_no']}")
+                    print("\n\033[93m[Users]\033[0m")
+                    print(data['users'])
+                    print("\n\033[93m[Windows]\033[0m")
+                    print(f"\033[96mOS:\033[0m {data['win_cap']} ({data['win_ver']})")
+                    print(f"\033[96mAct:\033[0m {data['act_status']}")
+                    print("\n\033[93m[Hardware]\033[0m")
+                    print(f"\033[96mCPU:\033[0m {data['proc']}")
+                    print(f"\033[96mRAM:\033[0m {data['ram']}")
+                    print(f"\033[96mGPU:\033[0m {data['gpu']}")
+                    print(f"\033[96mType:\033[0m {data['sys_type']}")
+                    print("\033[96mStorage:\033[0m")
+                    for line in data['storage']:
+                        print(line)
+                else:
+                    print("\033[1m\033[91mFailed.\033[0m")
+                input("\n\033[90mEnter to return...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: OSReinstall (Downloading Media Creation Tool and triggering setup)...\033[0m\n")
-            mct_url = "https://go.microsoft.com/fwlink/?linkid=2156295"
-            os.system(f'powershell -Command "Invoke-WebRequest -Uri \'{mct_url}\' -OutFile \'$env:TEMP\\MediaCreationTool.exe\'"')
-            if os.path.exists(os.path.expandvars("%TEMP%\\MediaCreationTool.exe")):
-                os.system('start /wait %TEMP%\\MediaCreationTool.exe')
-                print("\n\033[1m\033[92m[✓] Done\033[0m")
-            else:
-                print("\n\033[1m\033[91m[X] Download Failed.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: OSReinstall (Downloading Media Creation Tool from Microsoft)...\033[0m\n")
+                mct_url = "https://go.microsoft.com/fwlink/?linkid=2156295"
+                temp_path = os.path.join(os.environ.get('TEMP', 'C:\\Windows\\Temp'), 'win10.exe')
+                os.system(f'powershell -Command "Invoke-WebRequest -Uri \'{mct_url}\' -OutFile \'{temp_path}\'"')
+                if os.path.exists(temp_path):
+                    os.system(f'start /wait "" "{temp_path}"')
+                    print("\n\033[1m\033[92m[✓] Done\033[0m")
+                else:
+                    print("\n\033[1m\033[91m[X] Download Failed. Check connection.\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: OfficeInstall (Downloading MS Office and silently installing)...\033[0m\n")
-            app_url = "https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=O365HomePremRetail&platform=x64&language=en-us&version=O16GA"
-            os.system(f'powershell -Command "Invoke-WebRequest -Uri \'{app_url}\' -OutFile \'$env:TEMP\\OfficeSetup.exe\'"')
-            if os.path.exists(os.path.expandvars("%TEMP%\\OfficeSetup.exe")):
-                os.system('start /wait %TEMP%\\OfficeSetup.exe /S /v /qn')
-                print("\n\033[1m\033[92m[✓] Done\033[0m")
-            else:
-                print("\n\033[1m\033[91m[X] Download Failed.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: OfficeInstall (Downloading MS Office setup from Microsoft)...\033[0m\n")
+                app_url = "https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=O365HomePremRetail&platform=x64&language=en-us&version=O16GA"
+                temp_path = os.path.join(os.environ.get('TEMP', 'C:\\Windows\\Temp'), 'office.exe')
+                os.system(f'powershell -Command "Invoke-WebRequest -Uri \'{app_url}\' -OutFile \'{temp_path}\'"')
+                if os.path.exists(temp_path):
+                    os.system(f'start /wait "" "{temp_path}"')
+                    print("\n\033[1m\033[92m[✓] Done\033[0m")
+                else:
+                    print("\n\033[1m\033[91m[X] Download Failed. Check connection.\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Activator (Running the Microsoft licensing script)...\033[0m\n")
-            os.system('powershell -c "iwr \'https://microsoft.com\' -OutFile $env:TEMP\\a.cmd; & $env:TEMP\\a.cmd"')
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Activator (Runs the Microsoft licensing activator script)...\033[0m\n")
+                os.system('powershell -c "iwr \'https://microsoft.com\' -OutFile $env:TEMP\\a.cmd; & $env:TEMP\\a.cmd"')
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '5':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Chrome (Installing Google Chrome silently via Winget)...\033[0m\n")
-            os.system("winget install Google.Chrome -e --accept-package-agreements --accept-source-agreements --silent")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Chrome (Installs Google Chrome silently via Winget)...\033[0m\n")
+                os.system("winget install Google.Chrome -e --accept-package-agreements --accept-source-agreements --silent")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '6':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BackupD (Creating a symbolic link from D: drive to OneDrive)...\033[0m\n")
-            od_path = os.environ.get('OneDrive', os.path.join(os.environ['USERPROFILE'], 'OneDrive'))
-            if os.path.exists(od_path) and os.path.exists("D:\\"):
-                os.system(f'mklink /J "{od_path}\\Drive_D_Backup" "D:\\"')
-                print("\n\033[1m\033[92m[✓] Linked successfully to OneDrive\033[0m")
-            else:
-                print("\n\033[1m\033[91m[X] Failed. Ensure D:\\ drive and OneDrive exist.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BackupD (Creates a symbolic link from D: drive to OneDrive)...\033[0m\n")
+                od_path = os.path.join(os.environ['USERPROFILE'], 'OneDrive')
+                if not os.path.exists(od_path):
+                    od_path = os.path.join(os.environ['USERPROFILE'], 'OneDrive - Personal')
+                if os.path.exists(od_path) and os.path.exists("D:\\"):
+                    try:
+                        os.system(f'mklink /J "{od_path}\\Drive_D_Backup" "D:\\"')
+                        print("\n\033[1m\033[92m[✓] Linked Successfully\033[0m")
+                    except:
+                        print("\n\033[1m\033[91m[X] Link Error\033[0m")
+                else:
+                    print("\n\033[1m\033[91m[X] Failed. OneDrive or D:\\ drive not found.\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '7':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Branding (Applying inbuilt corporate wallpaper and lock screen)...\033[0m\n")
-            home_img = resource_path("homescreen.png")
-            lock_img = resource_path("lockscreen.png")
-            
-            if os.path.exists(home_img) and os.path.exists(lock_img):
-                ctypes.windll.user32.SystemParametersInfoW(20, 0, home_img, 3)
-                os.system(f'reg add "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization" /v LockScreenImage /t REG_SZ /d "{lock_img}" /f')
-                print("\n\033[1m\033[92m[✓] Branding Applied Successfully\033[0m")
-            else:
-                print("\n\033[1m\033[91m[X] Images not found in executable.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Branding (Applies inbuilt corporate wallpaper and lock screen images)...\033[0m\n")
+                home_img = resource_path("homescreen.png")
+                lock_img = resource_path("lockscreen.png")
+                
+                if os.path.exists(home_img) and os.path.exists(lock_img):
+                    SPI_SETDESKWALLPAPER = 20
+                    ctypes.windll.user32.SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0, home_img, 3)
+                    os.system(f'reg add "HKCU\\Control Panel\\Desktop" /v Wallpaper /t REG_SZ /d "{home_img}" /f')
+                    os.system(f'reg add "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization" /v LockScreenImage /t REG_SZ /d "{lock_img}" /f')
+                    os.system("RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters")
+                    print("\n\033[1m\033[92m[✓] Done\033[0m")
+                else:
+                    print("\n\033[1m\033[91m[X] Failed. Images not found in the executable.\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '8':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: PCRename (Renaming the computer locally)...\033[0m\n")
-            new_name = input("\033[96mEnter new PC Name: \033[0m").strip()
-            os.system(f'wmic computersystem where name="%computername%" call rename name="{new_name}"')
-            print("\n\033[1m\033[92m[✓] Done. Restart required to apply changes.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: RenamePC (Renames the Computer)...\033[0m\n")
+                new_name = input("\033[96mEnter New PC Name: \033[0m").strip()
+                os.system(f'powershell -Command "Rename-Computer -NewName \'{new_name}\' -Force"')
+                print("\n\033[1m\033[92m[✓] Restart Required\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '9':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: UpdateApps (Upgrading all installed applications using Winget)...\033[0m\n")
-            os.system("winget upgrade --all --silent --accept-package-agreements --accept-source-agreements")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: UpdateApps (Upgrades all installed applications using Winget)...\033[0m\n")
+                os.system("winget upgrade --all --silent --accept-package-agreements --accept-source-agreements")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '10':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: UpdateDrivers (Scanning for hardware changes and new drivers)...\033[0m\n")
-            os.system("pnputil /scan-devices")
-            print("\n\033[1m\033[92m[✓] Hardware scan complete. Missing drivers will initialize.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: UpdateDrivers (Triggers background Windows Update for missing drivers)...\033[0m\n")
+                print("\033[96mMissing or Error Drivers:\033[0m")
+                os.system('powershell "Get-PnpDevice | Where-Object {$_.Status -eq \'Error\' -or $_.Status -eq \'Degraded\'} | Select-Object FriendlyName, InstanceId"')
+                print("\n\033[96mTriggering Windows Update for Driver Installation...\033[0m")
+                os.system("UsoClient ScanInstallWait")
+                print("\n\033[1m\033[92m[✓] Driver Update Initiated in Background via Windows Update\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '11':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: DropAdmin (Removes specified user from the local Administrators group)...\033[0m\n")
-            print("\033[96mCurrent Administrators:\033[0m")
-            os.system('net localgroup administrators')
-            usr = input("\n\033[96mEnter Exact Username to drop to Standard User: \033[0m").strip()
-            os.system(f'net localgroup administrators "{usr}" /delete')
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: DropAdmin (Removes specified user from the local Administrators group)...\033[0m\n")
+                print("\033[96mCurrent Administrators:\033[0m")
+                os.system("net localgroup administrators")
+                usr = input("\n\033[96mUsername to drop to Standard User: \033[0m").strip()
+                os.system(f'net localgroup administrators "{usr}" /delete')
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '12':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BlockApps (Enforcing strict UAC restrictions and blocking MSI installs)...\033[0m\n")
-            os.system('reg add "HKLM\\Software\\Policies\\Microsoft\\Windows\\Installer" /v DisableUserInstalls /t REG_DWORD /d 1 /f')
-            os.system('reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v ConsentPromptBehaviorUser /t REG_DWORD /d 0 /f')
-            print("\n\033[1m\033[92m[✓] Restrictions Applied. Standard users will be automatically denied install permissions.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BlockApps (Configures UAC to auto-deny exe installs for standard users)...\033[0m\n")
+                os.system('reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v ConsentPromptBehaviorUser /t REG_DWORD /d 0 /f')
+                os.system('reg add "HKLM\\Software\\Policies\\Microsoft\\Windows\\Installer" /v DisableUserInstalls /t REG_DWORD /d 1 /f')
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '13':
-            print("\n\033[1m\033[91mWARNING: This will initiate 1-Click Offboarding wipe.\033[0m")
-            confirm = input("\033[93mProceed? (Y/N): \033[0m").strip().lower()
-            if confirm == 'y' or confirm == 'yes':
-                usr = input("\033[96mTarget Username to wipe: \033[0m").strip()
-                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Offboarding (Terminating OneDrive, deleting browser data, disabling account)...\033[0m\n")
-                os.system("taskkill /f /im onedrive.exe")
-                os.system(f'rmdir /s /q "C:\\Users\\{usr}\\AppData\\Local\\Google\\Chrome\\User Data"')
-                os.system(f'rmdir /s /q "C:\\Users\\{usr}\\AppData\\Local\\Microsoft\\Edge\\User Data"')
-                os.system(f'net user "{usr}" /active:no')
-                fake_progress_bar(3.0, "Wiping")
-                print("\n\033[1m\033[92m[✓] Logoff pending\033[0m")
-                os.system("shutdown /l")
-            else:
-                print("\n\033[92mAborted\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Onboarding...\033[0m\n")
+                print("\033[96mOnboarding module initialized. Awaiting configuration...\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '14':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Onboarding (Placeholder logic for future setup)...\033[0m\n")
-            print("\n\033[1m\033[92m[✓] Onboarding routine triggered.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-            
+            try:
+                print("\n\033[1m\033[91mWARNING: Wipe\033[0m")
+                confirm = input("\033[93mProceed? (Y/N): \033[0m").strip().lower()
+                if confirm == 'y' or confirm == 'yes':
+                    usr = input("\033[96mTarget Username: \033[0m").strip()
+                    print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Offboarding (Terminates OneDrive, deletes browser data, and disables user account)...\033[0m\n")
+                    os.system("taskkill /f /im onedrive.exe")
+                    os.system(f'rmdir /s /q "C:\\Users\\{usr}\\AppData\\Local\\Google\\Chrome\\User Data"')
+                    os.system(f'rmdir /s /q "C:\\Users\\{usr}\\AppData\\Local\\Microsoft\\Edge\\User Data"')
+                    os.system(f'net user "{usr}" /active:no')
+                    fake_progress_bar(3.0, "Wiping")
+                    print("\n\033[1m\033[92m[✓] Logoff pending\033[0m")
+                    os.system("shutdown /l")
+                else:
+                    print("\n\033[92mAborted\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
+        elif choice == '15':
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: LockSystem (Toggles device lock restriction and Control Panel access)...\033[0m\n")
+                state = run_cmd('reg query "HKLM\\SOFTWARE\\BBIPL" /v DeviceLock').strip()
+                current = "ON" if "0x1" in state else "OFF"
+                print(f"\033[96mCurrent Lock Status: {current}\033[0m")
+                toggle = input("\033[93mTurn Lock ON or OFF? (ON/OFF): \033[0m").strip().upper()
+                if toggle == "ON":
+                    os.system('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer" /v NoControlPanel /t REG_DWORD /d 1 /f')
+                    os.system('reg add "HKLM\\SOFTWARE\\BBIPL" /v DeviceLock /t REG_DWORD /d 1 /f')
+                    print("\n\033[1m\033[92m[✓] Lock ON (Control Panel Disabled)\033[0m")
+                elif toggle == "OFF":
+                    os.system('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer" /v NoControlPanel /t REG_DWORD /d 0 /f')
+                    os.system('reg add "HKLM\\SOFTWARE\\BBIPL" /v DeviceLock /t REG_DWORD /d 0 /f')
+                    print("\n\033[1m\033[92m[✓] Lock OFF (Control Panel Enabled)\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '0':
             break
         else:
-            print("\n\033[91mInvalid input. Please enter a valid number.\033[0m")
+            print("\n\033[91mInvalid input.\033[0m")
             time.sleep(1)
 
 def help_menu():
@@ -426,15 +545,16 @@ def help_menu():
     print("\033[96mOfficeInstall:\033[0m Downloads Office setup and silently installs it.")
     print("\033[96mActivator:\033[0m Runs the Microsoft licensing activator script.")
     print("\033[96mChrome:\033[0m Installs Google Chrome silently via Winget.")
-    print("\033[96mBackupD:\033[0m Creates a symbolic link from D: drive to your active OneDrive.")
+    print("\033[96mBackupD:\033[0m Creates a symbolic link from D: drive to OneDrive.")
     print("\033[96mBranding:\033[0m Applies corporate wallpaper and lock screen images using inbuilt resources.")
-    print("\033[96mPCRename:\033[0m Locally renames the computer device name.")
+    print("\033[96mRenamePC:\033[0m Renames the PC.")
     print("\033[96mUpdateApps:\033[0m Upgrades all installed applications using Winget.")
-    print("\033[96mUpdateDrivers:\033[0m Scans for hardware changes to initialize driver installations.")
+    print("\033[96mUpdateDrivers:\033[0m Lists missing drivers and triggers PnP scan via Windows Update.")
     print("\033[96mDropAdmin:\033[0m Removes specified user from the local Administrators group.")
-    print("\033[96mBlockApps:\033[0m Auto-Denies UAC elevation and blocks MSI installations for standard users.")
+    print("\033[96mBlockApps:\033[0m Configures UAC to auto-deny exe installs for standard users.")
+    print("\033[96mOnboarding:\033[0m Initiates setup procedure.")
     print("\033[96mOffboarding:\033[0m Terminates OneDrive, deletes browser data, and disables user account.")
-    print("\033[96mOnboarding:\033[0m Executes the new employee onboarding initialization protocols.")
+    print("\033[96mLockSystem:\033[0m Toggles device lock restriction and Control Panel access.")
     
     print("\033[1m\033[95m" + "="*70 + "\033[0m")
     input("\n\033[90mEnter to return...\033[0m")
@@ -458,47 +578,75 @@ def security_hardware_menu():
         choice = input("\033[1m\033[96mChoice: \033[0m")
         
         if choice == '1':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Antivirus (Checks the active status of Windows Defender or third-party AV)...\033[0m\n")
-            av_status = run_cmd('powershell "Get-CimInstance -Namespace root\\SecurityCenter2 -Class AntivirusProduct | Select-Object -ExpandProperty displayName"')
-            if av_status and "N/A" not in av_status:
-                print(f"\033[92mDetected: {av_status}\033[0m")
-            else:
-                print("\033[91mNot Found.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Antivirus (Checks the active status of Windows Defender or third-party AV)...\033[0m\n")
+                av_status = run_cmd('powershell "Get-CimInstance -Namespace root\\SecurityCenter2 -Class AntivirusProduct | Select-Object -ExpandProperty displayName"')
+                if av_status and "N/A" not in av_status:
+                    print(f"\033[92mDetected: {av_status}\033[0m")
+                else:
+                    print("\033[91mNot Found.\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Firewall (Audits the current status of Windows Firewall profiles)...\033[0m\n")
-            os.system("netsh advfirewall show allprofiles")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Firewall (Audits the current status of Windows Firewall profiles)...\033[0m\n")
+                os.system("netsh advfirewall show allprofiles")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: MalwareScan (Launches the Malicious Software Removal Tool)...\033[0m\n")
-            os.system("start mrt")
-            print("\033[1m\033[92m[✓] Started\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: MalwareScan (Launches the Malicious Software Removal Tool)...\033[0m\n")
+                os.system("start mrt")
+                print("\033[1m\033[92m[✓] Started\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: DriveHealth (Checks the S.M.A.R.T. health status of storage drives)...\033[0m\n")
-            os.system("wmic diskdrive get model,status")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: DriveHealth (Checks the S.M.A.R.T. health status of storage drives)...\033[0m\n")
+                os.system("wmic diskdrive get model,status")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '5':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Peripherals (Audits the status of Network, Audio, Camera, and Display devices)...\033[0m\n")
-            os.system('powershell "Get-NetAdapter | Select-Object Name, Status"')
-            os.system('powershell "Get-PnpDevice -Class Camera, AudioEndpoint | Select-Object Status, Class, FriendlyName"')
-            os.system('wmic path Win32_VideoController get Name, Status')
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Peripherals (Audits the status of Network, Audio, Camera, and Display devices)...\033[0m\n")
+                os.system('powershell "Get-NetAdapter | Select-Object Name, Status"')
+                os.system('powershell "Get-PnpDevice -Class Camera, AudioEndpoint | Select-Object Status, Class, FriendlyName"')
+                os.system('wmic path Win32_VideoController get Name, Status')
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '6':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Uptime (Displays the system uptime since the last reboot)...\033[0m\n")
-            os.system("net statistics workstation")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Uptime (Displays the system uptime since the last reboot)...\033[0m\n")
+                os.system("net statistics workstation")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '7':
-            print("\n\033[93mSave Battery Report? (Y/N)\033[0m")
-            save_choice = input("\033[1m\033[96mChoice: \033[0m").strip().lower()
-            if save_choice == 'y' or save_choice == 'yes':
-                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Battery (Generates and saves a detailed Battery Health Report)...\033[0m\n")
-                report_path = os.path.join(os.environ['USERPROFILE'], 'Desktop', 'Battery_Report.html')
-                os.system(f'powercfg /batteryreport /output "{report_path}"')
-                print(f"\n\033[1m\033[92m[✓] Saved: {report_path}\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[93mSave Battery Report? (Y/N)\033[0m")
+                save_choice = input("\033[1m\033[96mChoice: \033[0m").strip().lower()
+                if save_choice == 'y' or save_choice == 'yes':
+                    print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Battery (Generates and saves a detailed Battery Health Report)...\033[0m\n")
+                    report_path = os.path.join(os.environ['USERPROFILE'], 'Desktop', 'Battery_Report.html')
+                    os.system(f'powercfg /batteryreport /output "{report_path}"')
+                    print(f"\n\033[1m\033[92m[✓] Saved: {report_path}\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '0':
             break
 
@@ -523,53 +671,89 @@ def internet_fixer_menu():
         choice = input("\033[1m\033[96mChoice: \033[0m")
         
         if choice == '1':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Flush (Clears the DNS resolver cache)...\033[0m\n")
-            os.system("ipconfig /flushdns")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Flush (Clears the DNS resolver cache)...\033[0m\n")
+                os.system("ipconfig /flushdns")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: ResetWinsock (Resets Windows Sockets configuration)...\033[0m\n")
-            os.system("netsh winsock reset")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: ResetWinsock (Resets Windows Sockets configuration)...\033[0m\n")
+                os.system("netsh winsock reset")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: ResetIP (Resets TCP/IP stack configuration)...\033[0m\n")
-            os.system("netsh int ip reset")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: ResetIP (Resets TCP/IP stack configuration)...\033[0m\n")
+                os.system("netsh int ip reset")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Ping (Tests internet connectivity by pinging Google)...\033[0m\n")
-            os.system("ping google.com")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Ping (Tests internet connectivity by pinging Google)...\033[0m\n")
+                os.system("ping google.com")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '5':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Trace (Traces the network route to Google to detect drops)...\033[0m\n")
-            os.system("tracert google.com")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Trace (Traces the network route to Google to detect drops)...\033[0m\n")
+                os.system("tracert google.com")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '6':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Speed (Displays the active network adapter's link speed)...\033[0m\n")
-            os.system("wmic nic where \"NetEnabled='true'\" get name, Speed")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Speed (Displays the active network adapter's link speed)...\033[0m\n")
+                os.system("wmic nic where \"NetEnabled='true'\" get name, Speed")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '7':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Traffic (Lists all active network connections and listening ports)...\033[0m\n")
-            os.system("netstat -ab")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Traffic (Lists all active network connections and listening ports)...\033[0m\n")
+                os.system("netstat -ab")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '8':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Repair (Executes a complete suite of network reset and repair tools)...\033[0m\n")
-            os.system("ipconfig /flushdns")
-            os.system("netsh winsock reset")
-            os.system("netsh int ip reset")
-            os.system("wmic nic where \"NetEnabled='true'\" get name, Speed")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Repair (Executes a complete suite of network reset and repair tools)...\033[0m\n")
+                os.system("ipconfig /flushdns")
+                os.system("netsh winsock reset")
+                os.system("netsh int ip reset")
+                os.system("wmic nic where \"NetEnabled='true'\" get name, Speed")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '9':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Gigabit (Opens Network Connections to manually configure 1Gbps duplex)...\033[0m\n")
-            os.system("start ncpa.cpl")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Gigabit (Opens Network Connections to manually configure 1Gbps duplex)...\033[0m\n")
+                os.system("start ncpa.cpl")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '0':
             break
 
@@ -603,54 +787,86 @@ def health_checkup_menu():
         choice = input("\033[1m\033[96mChoice: \033[0m")
         
         if choice == '1':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Scan (Scans the file system for logical disk errors using CHKDSK)...\033[0m\n")
-            os.system("chkdsk C: /scan")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Scan (Scans the file system for logical disk errors using CHKDSK)...\033[0m\n")
+                os.system("chkdsk C: /scan")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Purge (Cleans up recycle bin and temporary files)...\033[0m\n")
-            os.system("powershell -Command \"Clear-RecycleBin -Force -ErrorAction SilentlyContinue\"")
-            os.system("powershell -Command \"Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue\"")
-            os.system("powershell -Command \"Remove-Item -Path 'C:\\Windows\\Temp\\*' -Recurse -Force -ErrorAction SilentlyContinue\"")
-            fake_progress_bar(2.5, "Purging")
-            print("\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Purge (Cleans up recycle bin and temporary files)...\033[0m\n")
+                os.system("powershell -Command \"Clear-RecycleBin -Force -ErrorAction SilentlyContinue\"")
+                os.system("powershell -Command \"Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue\"")
+                os.system("powershell -Command \"Remove-Item -Path 'C:\\Windows\\Temp\\*' -Recurse -Force -ErrorAction SilentlyContinue\"")
+                fake_progress_bar(2.5, "Purging")
+                print("\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Optimize (Cleans up the Windows component store using DISM)...\033[0m\n")
-            os.system("dism /online /cleanup-image /startcomponentcleanup")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Optimize (Cleans up the Windows component store using DISM)...\033[0m\n")
+                os.system("dism /online /cleanup-image /startcomponentcleanup")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Cleanup (Runs the advanced disk cleanup utility)...\033[0m\n")
-            os.system("cleanmgr /sagerun:1 | cleanmgr /verylowdisk")
-            fake_progress_bar(3.0, "Cleanup")
-            print("\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Cleanup (Runs the advanced disk cleanup utility)...\033[0m\n")
+                os.system("cleanmgr /sagerun:1 | cleanmgr /verylowdisk")
+                fake_progress_bar(3.0, "Cleanup")
+                print("\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '5':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Verify (Scans and repairs corrupted system files using SFC)...\033[0m\n")
-            os.system("sfc /scannow")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Verify (Scans and repairs corrupted system files using SFC)...\033[0m\n")
+                os.system("sfc /scannow")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '6':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Diagnostic (Runs a full suite of health, cleaning, and integrity checks)...\033[0m\n")
-            os.system("chkdsk C: /scan")
-            os.system("powershell -Command \"Clear-RecycleBin -Force -ErrorAction SilentlyContinue\"")
-            os.system("powershell -Command \"Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue\"")
-            os.system("dism /online /cleanup-image /startcomponentcleanup")
-            os.system("cleanmgr /verylowdisk")
-            os.system("sfc /scannow")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Diagnostic (Runs a full suite of health, cleaning, and integrity checks)...\033[0m\n")
+                os.system("chkdsk C: /scan")
+                os.system("powershell -Command \"Clear-RecycleBin -Force -ErrorAction SilentlyContinue\"")
+                os.system("powershell -Command \"Remove-Item -Path $env:TEMP\\* -Recurse -Force -ErrorAction SilentlyContinue\"")
+                os.system("dism /online /cleanup-image /startcomponentcleanup")
+                os.system("cleanmgr /verylowdisk")
+                os.system("sfc /scannow")
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '7':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Monitor (Opens the Windows Reliability Monitor to check crash logs)...\033[0m\n")
-            os.system("start perfmon /rel")
-            print("\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Monitor (Opens the Windows Reliability Monitor to check crash logs)...\033[0m\n")
+                os.system("start perfmon /rel")
+                print("\033[1m\033[92m[✓] Done\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '8':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Reboot (Initiates a system reboot in 15 seconds)...\033[0m\n")
-            os.system("shutdown /r /t 15")
-            print("\033[1m\033[92m[✓] Rebooting in 15s\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
+            try:
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Reboot (Initiates a system reboot in 15 seconds)...\033[0m\n")
+                os.system("shutdown /r /t 15")
+                print("\033[1m\033[92m[✓] Rebooting in 15s\033[0m")
+                input("\n\033[90mEnter to continue...\033[0m")
+            except KeyboardInterrupt:
+                print("\n\033[1m\033[91m[!] Stopped by user.\033[0m")
+                time.sleep(1)
         elif choice == '0':
             break
 
@@ -699,18 +915,18 @@ def main():
         os.system('cls' if os.name == 'nt' else 'clear')
         display_connection_status(system_data)
         print("\n\033[1m\033[95m" + "="*70 + "\033[0m")
-        print("\033[1m\033[93m GO TO MENU (M) \033[0m")
+        print("\033[1m\033[93m GO TO MENU (M) | QUIT (Ctrl+Q) \033[0m")
         
         start_time = time.time()
         action = None
         while time.time() - start_time < 5.0:
             if msvcrt.kbhit():
-                key = msvcrt.getch().decode('utf-8', errors='ignore').lower()
-                if key == 'm':
-                    action = 'menu'
-                    break
-                elif key == 'q':
+                key = msvcrt.getch()
+                if key == b'\x11':
                     action = 'quit'
+                    break
+                elif key.lower() == b'm':
+                    action = 'menu'
                     break
             time.sleep(0.1)
             
