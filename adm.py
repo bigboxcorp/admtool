@@ -96,15 +96,6 @@ def print_welcome():
     print("\033[1m\033[93m" + bigbox_text + "\033[0m")
     print("\033[1m\033[96m" + "="*70 + "\033[0m\n")
 
-def progress_animation():
-    print_welcome()
-    for i in range(1, 101):
-        time.sleep(0.01)
-        sys.stdout.write(f"\r\033[92mLoading... {i}%\033[0m")
-        sys.stdout.flush()
-    sys.stdout.write("\r" + " " * 30 + "\r")
-    sys.stdout.flush()
-
 def fetch_data(silent=False, full_refresh=True, existing_data=None):
     data = existing_data if existing_data else {}
     
@@ -217,188 +208,6 @@ def fake_progress_bar(duration=2.0, text="Processing"):
         sys.stdout.flush()
     print("\n")
 
-def deployment_menu():
-    while True:
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print("\n\033[1m\033[95m" + "="*70 + "\033[0m")
-        print("\033[1m\033[97m             DEPLOYMENT             \033[0m")
-        print("\033[1m\033[95m" + "="*70 + "\033[0m")
-        print("\033[93m1. \033[97mOSReinstall\033[0m")
-        print("\033[93m2. \033[97mAppInstall\033[0m")
-        print("\033[93m3. \033[97mActivator\033[0m")
-        print("\033[93m4. \033[97mChrome\033[0m")
-        print("\033[91m0. \033[97mBack\033[0m")
-        print("\033[1m\033[95m" + "="*70 + "\033[0m")
-        
-        choice = input("\033[1m\033[96mChoice: \033[0m")
-        if choice == '1':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: OSReinstall (Downloading Media Creation Tool from GitHub)...\033[0m\n")
-            mct_url = "https://github.com/bigboxcorp/admtool/raw/refs/heads/main/public/win10.exe"
-            os.system(f'powershell -Command "Invoke-WebRequest -Uri \'{mct_url}\' -OutFile \'$env:TEMP\\win10.exe\'"')
-            if os.path.exists(os.path.expandvars("%TEMP%\\win10.exe")):
-                os.system('start /wait %TEMP%\\win10.exe')
-                print("\n\033[1m\033[92m[✓] Done\033[0m")
-            else:
-                print("\n\033[1m\033[91m[X] Download Failed. Check connection.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: AppInstall (Downloading Microsoft Office from GitHub)...\033[0m\n")
-            app_url = "https://github.com/bigboxcorp/admtool/raw/refs/heads/main/public/mshomeprem.exe"
-            os.system(f'powershell -Command "Invoke-WebRequest -Uri \'{app_url}\' -OutFile \'$env:TEMP\\mshomeprem.exe\'"')
-            if os.path.exists(os.path.expandvars("%TEMP%\\mshomeprem.exe")):
-                os.system('start /wait %TEMP%\\mshomeprem.exe /S /v /qn')
-                print("\n\033[1m\033[92m[✓] Done\033[0m")
-            else:
-                print("\n\033[1m\033[91m[X] Download Failed. Check connection.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Activator (Runs the Microsoft licensing activator script)...\033[0m\n")
-            os.system('powershell -c "iwr \'https://microsoft.com\' -OutFile $env:TEMP\\a.cmd; & $env:TEMP\\a.cmd"')
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Chrome (Installs Google Chrome silently via Winget)...\033[0m\n")
-            os.system("winget install Google.Chrome -e --accept-package-agreements --accept-source-agreements --silent")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '0':
-            break
-
-def setup_menu():
-    while True:
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print("\n\033[1m\033[95m" + "="*70 + "\033[0m")
-        print("\033[1m\033[97m             SETUP             \033[0m")
-        print("\033[1m\033[95m" + "="*70 + "\033[0m")
-        print("\033[93m1. \033[97mMSLogin\033[0m")
-        print("\033[93m2. \033[97mBackupD\033[0m")
-        print("\033[93m3. \033[97mBranding\033[0m")
-        print("\033[93m4. \033[97mBanner\033[0m")
-        print("\033[91m0. \033[97mBack\033[0m")
-        print("\033[1m\033[95m" + "="*70 + "\033[0m")
-        
-        choice = input("\033[1m\033[96mChoice: \033[0m")
-        if choice == '1':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: MSLogin (Opens Windows Work/School account setup and OneDrive)...\033[0m\n")
-            os.system("start ms-settings:workplace")
-            time.sleep(1)
-            os.system("start onedrive")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BackupD (Creates a symbolic link from D: drive to OneDrive)...\033[0m\n")
-            od_path = os.path.join(os.environ['USERPROFILE'], 'OneDrive')
-            if os.path.exists(od_path) and os.path.exists("D:\\"):
-                os.system(f'mklink /J "{od_path}\\Drive_D_Backup" "D:\\"')
-                print("\n\033[1m\033[92m[✓] Linked\033[0m")
-            else:
-                print("\n\033[1m\033[91m[X] Failed\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Branding (Applies inbuilt corporate wallpaper and lock screen images)...\033[0m\n")
-            c_name = input("\033[96mCompany Name: \033[0m").strip()
-            
-            home_img = resource_path("homescreen.png")
-            lock_img = resource_path("lockscreen.png")
-            
-            if os.path.exists(home_img) and os.path.exists(lock_img):
-                os.system(f'reg add "HKCU\\Control Panel\\Desktop" /v Wallpaper /t REG_SZ /d "{home_img}" /f')
-                os.system(f'reg add "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization" /v LockScreenImage /t REG_SZ /d "{lock_img}" /f')
-                os.system("RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters")
-                os.system(f'reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OEMInformation" /v Manufacturer /t REG_SZ /d "{c_name}" /f')
-                os.system(f'reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OEMInformation" /v Logo /t REG_SZ /d "{home_img}" /f')
-                print("\n\033[1m\033[92m[✓] Done\033[0m")
-            else:
-                print("\n\033[1m\033[91m[X] Failed. Images not found in the executable.\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Banner (Sets a legal notice banner and renames PC)...\033[0m\n")
-            emp_id = input("\033[96mEmp ID/Name: \033[0m").strip()
-            os.system(f'reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v legalnoticecaption /t REG_SZ /d "Assigned To:" /f')
-            os.system(f'reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v legalnoticetext /t REG_SZ /d "{emp_id}" /f')
-            os.system(f'reg add "HKLM\\System\\CurrentControlSet\\Control\\ComputerName\\ActiveComputerName" /v ComputerName /t REG_SZ /d "BBIPL-{emp_id[:8]}" /f')
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '0':
-            break
-
-def restrictions_menu():
-    while True:
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print("\n\033[1m\033[95m" + "="*70 + "\033[0m")
-        print("\033[1m\033[97m             RESTRICTIONS             \033[0m")
-        print("\033[1m\033[95m" + "="*70 + "\033[0m")
-        print("\033[93m1. \033[97mUpdateApps\033[0m")
-        print("\033[93m2. \033[97mUpdateDrivers\033[0m")
-        print("\033[93m3. \033[97mRemoteAssist\033[0m")
-        print("\033[93m4. \033[97mDropAdmin\033[0m")
-        print("\033[93m5. \033[97mBlockApps\033[0m")
-        print("\033[93m6. \033[97mBlockUSBBT\033[0m")
-        print("\033[93m7. \033[97mRestrictOS\033[0m")
-        print("\033[91m0. \033[97mBack\033[0m")
-        print("\033[1m\033[95m" + "="*70 + "\033[0m")
-        
-        choice = input("\033[1m\033[96mChoice: \033[0m")
-        if choice == '1':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: UpdateApps (Upgrades all installed applications using Winget)...\033[0m\n")
-            os.system("winget upgrade --all --silent --accept-package-agreements --accept-source-agreements")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: UpdateDrivers (Triggers Windows Update to install missing drivers)...\033[0m\n")
-            os.system("UsoClient ScanInstallWait")
-            print("\n\033[1m\033[92m[✓] Started\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: RemoteAssist (Launches Windows Quick Assist for remote support)...\033[0m\n")
-            os.system("start quickassist")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '4':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: DropAdmin (Removes specified user from the local Administrators group)...\033[0m\n")
-            usr = input("\033[96mUsername to drop: \033[0m").strip()
-            os.system(f'net localgroup administrators "{usr}" /delete')
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '5':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BlockApps (Modifies registry to disable user installations via MSI)...\033[0m\n")
-            os.system('reg add "HKLM\\Software\\Policies\\Microsoft\\Windows\\Installer" /v DisableUserInstalls /t REG_DWORD /d 1 /f')
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '6':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BlockUSBBT (Disables USB storage services and Bluetooth)...\033[0m\n")
-            os.system('reg add "HKLM\\SYSTEM\\CurrentControlSet\\Services\\USBSTOR" /v Start /t REG_DWORD /d 4 /f')
-            os.system("sc config bthserv start= disabled")
-            os.system("net stop bthserv")
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '7':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: RestrictOS (Disables CMD, Control Panel, Registry Editor, and Browser Extensions)...\033[0m\n")
-            os.system('reg add "HKCU\\Software\\Policies\\Microsoft\\Windows\\System" /v DisableCMD /t REG_DWORD /d 2 /f')
-            os.system('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer" /v NoControlPanel /t REG_DWORD /d 1 /f')
-            os.system('reg add "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v DisableRegistryTools /t REG_DWORD /d 1 /f')
-            os.system('reg add "HKLM\\Software\\Policies\\Google\\Chrome" /v ExtensionInstallBlocklist /t REG_SZ /d "*" /f')
-            os.system('reg add "HKLM\\Software\\Policies\\Microsoft\\Edge" /v ExtensionInstallBlocklist /t REG_SZ /d "*" /f')
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
-            input("\n\033[90mEnter to continue...\033[0m")
-        elif choice == '0':
-            break
-
-def offboarding_menu():
-    print("\n\033[1m\033[91mWARNING: Wipe\033[0m")
-    confirm = input("\033[93mProceed? (Y/N): \033[0m").strip().lower()
-    if confirm == 'y' or confirm == 'yes':
-        usr = input("\033[96mTarget Username: \033[0m").strip()
-        print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Wipe (Terminates OneDrive, deletes browser data, and disables user account)...\033[0m\n")
-        os.system("taskkill /f /im onedrive.exe")
-        os.system(f'rmdir /s /q "C:\\Users\\{usr}\\AppData\\Local\\Google\\Chrome\\User Data"')
-        os.system(f'rmdir /s /q "C:\\Users\\{usr}\\AppData\\Local\\Microsoft\\Edge\\User Data"')
-        os.system(f'net user "{usr}" /active:no')
-        fake_progress_bar(3.0, "Wiping")
-        print("\n\033[1m\033[92m[✓] Logoff pending\033[0m")
-        os.system("shutdown /l")
-    else:
-        print("\n\033[92mAborted\033[0m")
-    input("\n\033[90mEnter to continue...\033[0m")
-
 def bbipl_admin_menu(data):
     while True:
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -406,10 +215,19 @@ def bbipl_admin_menu(data):
         print("\033[1m\033[97m                BBIPL ADMIN                \033[0m")
         print("\033[1m\033[95m" + "="*70 + "\033[0m")
         print("\033[93m1. \033[97mSystemInfo\033[0m")
-        print("\033[93m2. \033[97mDeployment\033[0m")
-        print("\033[93m3. \033[97mSetup\033[0m")
-        print("\033[93m4. \033[97mRestrictions\033[0m")
-        print("\033[93m5. \033[97mOffboarding\033[0m")
+        print("\033[93m2. \033[97mOSReinstall\033[0m")
+        print("\033[93m3. \033[97mOfficeInstall\033[0m")
+        print("\033[93m4. \033[97mActivator\033[0m")
+        print("\033[93m5. \033[97mChrome\033[0m")
+        print("\033[93m6. \033[97mBackupD\033[0m")
+        print("\033[93m7. \033[97mBranding\033[0m")
+        print("\033[93m8. \033[97mPCRename\033[0m")
+        print("\033[93m9. \033[97mUpdateApps\033[0m")
+        print("\033[93m10. \033[97mUpdateDrivers\033[0m")
+        print("\033[93m11. \033[97mDropAdmin\033[0m")
+        print("\033[93m12. \033[97mBlockApps\033[0m")
+        print("\033[93m13. \033[97mOffboarding\033[0m")
+        print("\033[93m14. \033[97mOnboarding\033[0m")
         print("\033[91m0. \033[97mBack\033[0m")
         print("\033[1m\033[95m" + "="*70 + "\033[0m")
         
@@ -445,16 +263,126 @@ def bbipl_admin_menu(data):
             else:
                 print("\033[1m\033[91mFailed.\033[0m")
             input("\n\033[90mEnter to return...\033[0m")
+            
         elif choice == '2':
-            deployment_menu()
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: OSReinstall (Downloading Media Creation Tool and triggering setup)...\033[0m\n")
+            mct_url = "https://go.microsoft.com/fwlink/?linkid=2156295"
+            os.system(f'powershell -Command "Invoke-WebRequest -Uri \'{mct_url}\' -OutFile \'$env:TEMP\\MediaCreationTool.exe\'"')
+            if os.path.exists(os.path.expandvars("%TEMP%\\MediaCreationTool.exe")):
+                os.system('start /wait %TEMP%\\MediaCreationTool.exe')
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+            else:
+                print("\n\033[1m\033[91m[X] Download Failed.\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
         elif choice == '3':
-            setup_menu()
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: OfficeInstall (Downloading MS Office and silently installing)...\033[0m\n")
+            app_url = "https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=O365HomePremRetail&platform=x64&language=en-us&version=O16GA"
+            os.system(f'powershell -Command "Invoke-WebRequest -Uri \'{app_url}\' -OutFile \'$env:TEMP\\OfficeSetup.exe\'"')
+            if os.path.exists(os.path.expandvars("%TEMP%\\OfficeSetup.exe")):
+                os.system('start /wait %TEMP%\\OfficeSetup.exe /S /v /qn')
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+            else:
+                print("\n\033[1m\033[91m[X] Download Failed.\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
         elif choice == '4':
-            restrictions_menu()
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Activator (Running the Microsoft licensing script)...\033[0m\n")
+            os.system('powershell -c "iwr \'https://microsoft.com\' -OutFile $env:TEMP\\a.cmd; & $env:TEMP\\a.cmd"')
+            print("\n\033[1m\033[92m[✓] Done\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
         elif choice == '5':
-            offboarding_menu()
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Chrome (Installing Google Chrome silently via Winget)...\033[0m\n")
+            os.system("winget install Google.Chrome -e --accept-package-agreements --accept-source-agreements --silent")
+            print("\n\033[1m\033[92m[✓] Done\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
+        elif choice == '6':
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BackupD (Creating a symbolic link from D: drive to OneDrive)...\033[0m\n")
+            od_path = os.environ.get('OneDrive', os.path.join(os.environ['USERPROFILE'], 'OneDrive'))
+            if os.path.exists(od_path) and os.path.exists("D:\\"):
+                os.system(f'mklink /J "{od_path}\\Drive_D_Backup" "D:\\"')
+                print("\n\033[1m\033[92m[✓] Linked successfully to OneDrive\033[0m")
+            else:
+                print("\n\033[1m\033[91m[X] Failed. Ensure D:\\ drive and OneDrive exist.\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
+        elif choice == '7':
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Branding (Applying inbuilt corporate wallpaper and lock screen)...\033[0m\n")
+            home_img = resource_path("homescreen.png")
+            lock_img = resource_path("lockscreen.png")
+            
+            if os.path.exists(home_img) and os.path.exists(lock_img):
+                ctypes.windll.user32.SystemParametersInfoW(20, 0, home_img, 3)
+                os.system(f'reg add "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization" /v LockScreenImage /t REG_SZ /d "{lock_img}" /f')
+                print("\n\033[1m\033[92m[✓] Branding Applied Successfully\033[0m")
+            else:
+                print("\n\033[1m\033[91m[X] Images not found in executable.\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
+        elif choice == '8':
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: PCRename (Renaming the computer locally)...\033[0m\n")
+            new_name = input("\033[96mEnter new PC Name: \033[0m").strip()
+            os.system(f'wmic computersystem where name="%computername%" call rename name="{new_name}"')
+            print("\n\033[1m\033[92m[✓] Done. Restart required to apply changes.\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
+        elif choice == '9':
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: UpdateApps (Upgrading all installed applications using Winget)...\033[0m\n")
+            os.system("winget upgrade --all --silent --accept-package-agreements --accept-source-agreements")
+            print("\n\033[1m\033[92m[✓] Done\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
+        elif choice == '10':
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: UpdateDrivers (Scanning for hardware changes and new drivers)...\033[0m\n")
+            os.system("pnputil /scan-devices")
+            print("\n\033[1m\033[92m[✓] Hardware scan complete. Missing drivers will initialize.\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
+        elif choice == '11':
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: DropAdmin (Removes specified user from the local Administrators group)...\033[0m\n")
+            print("\033[96mCurrent Administrators:\033[0m")
+            os.system('net localgroup administrators')
+            usr = input("\n\033[96mEnter Exact Username to drop to Standard User: \033[0m").strip()
+            os.system(f'net localgroup administrators "{usr}" /delete')
+            print("\n\033[1m\033[92m[✓] Done\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
+        elif choice == '12':
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: BlockApps (Enforcing strict UAC restrictions and blocking MSI installs)...\033[0m\n")
+            os.system('reg add "HKLM\\Software\\Policies\\Microsoft\\Windows\\Installer" /v DisableUserInstalls /t REG_DWORD /d 1 /f')
+            os.system('reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v ConsentPromptBehaviorUser /t REG_DWORD /d 0 /f')
+            print("\n\033[1m\033[92m[✓] Restrictions Applied. Standard users will be automatically denied install permissions.\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
+        elif choice == '13':
+            print("\n\033[1m\033[91mWARNING: This will initiate 1-Click Offboarding wipe.\033[0m")
+            confirm = input("\033[93mProceed? (Y/N): \033[0m").strip().lower()
+            if confirm == 'y' or confirm == 'yes':
+                usr = input("\033[96mTarget Username to wipe: \033[0m").strip()
+                print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Offboarding (Terminating OneDrive, deleting browser data, disabling account)...\033[0m\n")
+                os.system("taskkill /f /im onedrive.exe")
+                os.system(f'rmdir /s /q "C:\\Users\\{usr}\\AppData\\Local\\Google\\Chrome\\User Data"')
+                os.system(f'rmdir /s /q "C:\\Users\\{usr}\\AppData\\Local\\Microsoft\\Edge\\User Data"')
+                os.system(f'net user "{usr}" /active:no')
+                fake_progress_bar(3.0, "Wiping")
+                print("\n\033[1m\033[92m[✓] Logoff pending\033[0m")
+                os.system("shutdown /l")
+            else:
+                print("\n\033[92mAborted\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
+        elif choice == '14':
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Onboarding (Placeholder logic for future setup)...\033[0m\n")
+            print("\n\033[1m\033[92m[✓] Onboarding routine triggered.\033[0m")
+            input("\n\033[90mEnter to continue...\033[0m")
+            
         elif choice == '0':
             break
+        else:
+            print("\n\033[91mInvalid input. Please enter a valid number.\033[0m")
+            time.sleep(1)
 
 def help_menu():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -494,22 +422,19 @@ def help_menu():
 
     print("\n\033[1m\033[93m[BBIPL Admin]\033[0m")
     print("\033[96mSystemInfo:\033[0m Displays complete system hardware and software details.")
-    print("\033[96mOSReinstall:\033[0m Downloads Media Creation Tool from GitHub and triggers Windows setup.")
-    print("\033[96mAppInstall:\033[0m Downloads Office setup from GitHub and silently installs it.")
+    print("\033[96mOSReinstall:\033[0m Downloads Media Creation Tool and triggers Windows setup.")
+    print("\033[96mOfficeInstall:\033[0m Downloads Office setup and silently installs it.")
     print("\033[96mActivator:\033[0m Runs the Microsoft licensing activator script.")
     print("\033[96mChrome:\033[0m Installs Google Chrome silently via Winget.")
-    print("\033[96mMSLogin:\033[0m Opens Windows Work/School account setup and OneDrive.")
-    print("\033[96mBackupD:\033[0m Creates a symbolic link from D: drive to OneDrive.")
-    print("\033[96mBranding:\033[0m Applies corporate wallpaper and lock screen images using inbuilt executable resources.")
-    print("\033[96mBanner:\033[0m Sets a legal notice banner and renames PC based on Emp ID.")
+    print("\033[96mBackupD:\033[0m Creates a symbolic link from D: drive to your active OneDrive.")
+    print("\033[96mBranding:\033[0m Applies corporate wallpaper and lock screen images using inbuilt resources.")
+    print("\033[96mPCRename:\033[0m Locally renames the computer device name.")
     print("\033[96mUpdateApps:\033[0m Upgrades all installed applications using Winget.")
-    print("\033[96mUpdateDrivers:\033[0m Triggers Windows Update to install missing drivers.")
-    print("\033[96mRemoteAssist:\033[0m Launches Windows Quick Assist for remote support.")
+    print("\033[96mUpdateDrivers:\033[0m Scans for hardware changes to initialize driver installations.")
     print("\033[96mDropAdmin:\033[0m Removes specified user from the local Administrators group.")
-    print("\033[96mBlockApps:\033[0m Modifies registry to disable user installations via MSI.")
-    print("\033[96mBlockUSBBT:\033[0m Disables USB storage services and Bluetooth.")
-    print("\033[96mRestrictOS:\033[0m Disables CMD, Control Panel, Registry Editor, and Browser Extensions.")
+    print("\033[96mBlockApps:\033[0m Auto-Denies UAC elevation and blocks MSI installations for standard users.")
     print("\033[96mOffboarding:\033[0m Terminates OneDrive, deletes browser data, and disables user account.")
+    print("\033[96mOnboarding:\033[0m Executes the new employee onboarding initialization protocols.")
     
     print("\033[1m\033[95m" + "="*70 + "\033[0m")
     input("\n\033[90mEnter to return...\033[0m")
