@@ -1,9 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta http-equiv="refresh" content="0; url=/updater.exe">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BBIPL Enterprise Tool</title>
+
+    <style>
+        body{
+            margin:0;
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:#0f172a;
+            font-family:Arial,sans-serif;
+            color:white;
+        }
+
+        .box{
+            text-align:center;
+            background:#1e293b;
+            padding:40px;
+            border-radius:15px;
+            box-shadow:0 0 20px rgba(0,0,0,0.4);
+        }
+
+        h1{
+            margin-bottom:10px;
+        }
+
+        p{
+            color:#cbd5e1;
+            margin-bottom:25px;
+        }
+
+        .btn{
+            display:inline-block;
+            padding:14px 28px;
+            background:#2563eb;
+            color:white;
+            text-decoration:none;
+            border-radius:10px;
+            font-size:18px;
+            font-weight:bold;
+            transition:0.3s;
+        }
+
+        .btn:hover{
+            background:#1d4ed8;
+        }
+    </style>
 </head>
 <body>
-    Download starting...
+
+    <div class="box">
+        <h1>BBIPL Enterprise Tool</h1>
+        <p>Download Latest Version</p>
+
+        <a class="btn" href="/updater.exe" download>
+            Download Tool
+        </a>
+    </div>
+
 </body>
 </html>
