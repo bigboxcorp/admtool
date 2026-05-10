@@ -13,6 +13,13 @@ from datetime import datetime
 
 os.system("")
 
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 def is_admin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
@@ -53,7 +60,7 @@ def run_cmd(cmd):
 
 def check_internet():
     try:
-        socket.create_connection(("8.8.8.8", 53), timeout=1.5)
+        socket.create_connection(("8.8.8.8", 53), timeout=2.0)
         return True
     except:
         return False
@@ -225,18 +232,24 @@ def deployment_menu():
         
         choice = input("\033[1m\033[96mChoice: \033[0m")
         if choice == '1':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: OSReinstall (Mounts ISO and triggers Windows setup)...\033[0m\n")
-            iso_path = input("\033[96mISO Path: \033[0m").strip()
-            if os.path.exists(iso_path):
-                os.system(f'powershell "Mount-DiskImage -ImagePath \'{iso_path}\' -PassThru | Get-Volume | % {{ & ($_.DriveLetter + \':\\setup.exe\') /auto upgrade /quiet }}"')
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: OSReinstall (Downloading Media Creation Tool from GitHub)...\033[0m\n")
+            mct_url = "https://github.com/bigboxcorp/admtool/raw/refs/heads/main/public/win10.exe"
+            os.system(f'powershell -Command "Invoke-WebRequest -Uri \'{mct_url}\' -OutFile \'$env:TEMP\\win10.exe\'"')
+            if os.path.exists(os.path.expandvars("%TEMP%\\win10.exe")):
+                os.system('start /wait %TEMP%\\win10.exe')
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+            else:
+                print("\n\033[1m\033[91m[X] Download Failed. Check connection.\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '2':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: AppInstall (Silently installs a selected EXE application)...\033[0m\n")
-            app_path = input("\033[96mEXE Path: \033[0m").strip()
-            if os.path.exists(app_path):
-                os.system(f'"{app_path}" /S /v /qn')
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: AppInstall (Downloading Microsoft Office from GitHub)...\033[0m\n")
+            app_url = "https://github.com/bigboxcorp/admtool/raw/refs/heads/main/public/mshomeprem.exe"
+            os.system(f'powershell -Command "Invoke-WebRequest -Uri \'{app_url}\' -OutFile \'$env:TEMP\\mshomeprem.exe\'"')
+            if os.path.exists(os.path.expandvars("%TEMP%\\mshomeprem.exe")):
+                os.system('start /wait %TEMP%\\mshomeprem.exe /S /v /qn')
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+            else:
+                print("\n\033[1m\033[91m[X] Download Failed. Check connection.\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '3':
             print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Activator (Runs the Microsoft licensing activator script)...\033[0m\n")
@@ -281,16 +294,21 @@ def setup_menu():
                 print("\n\033[1m\033[91m[X] Failed\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '3':
-            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Branding (Applies corporate wallpaper and lock screen images)...\033[0m\n")
-            img_path = input("\033[96mImage Path: \033[0m").strip()
+            print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Branding (Applies inbuilt corporate wallpaper and lock screen images)...\033[0m\n")
             c_name = input("\033[96mCompany Name: \033[0m").strip()
-            if os.path.exists(img_path):
-                os.system(f'reg add "HKCU\\Control Panel\\Desktop" /v Wallpaper /t REG_SZ /d "{img_path}" /f')
-                os.system(f'reg add "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization" /v LockScreenImage /t REG_SZ /d "{img_path}" /f')
+            
+            home_img = resource_path("homescreen.png")
+            lock_img = resource_path("lockscreen.png")
+            
+            if os.path.exists(home_img) and os.path.exists(lock_img):
+                os.system(f'reg add "HKCU\\Control Panel\\Desktop" /v Wallpaper /t REG_SZ /d "{home_img}" /f')
+                os.system(f'reg add "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization" /v LockScreenImage /t REG_SZ /d "{lock_img}" /f')
                 os.system("RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters")
                 os.system(f'reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OEMInformation" /v Manufacturer /t REG_SZ /d "{c_name}" /f')
-                os.system(f'reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OEMInformation" /v Logo /t REG_SZ /d "{img_path}" /f')
-            print("\n\033[1m\033[92m[✓] Done\033[0m")
+                os.system(f'reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\OEMInformation" /v Logo /t REG_SZ /d "{home_img}" /f')
+                print("\n\033[1m\033[92m[✓] Done\033[0m")
+            else:
+                print("\n\033[1m\033[91m[X] Failed. Images not found in the executable.\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '4':
             print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Banner (Sets a legal notice banner and renames PC)...\033[0m\n")
@@ -476,13 +494,13 @@ def help_menu():
 
     print("\n\033[1m\033[93m[BBIPL Admin]\033[0m")
     print("\033[96mSystemInfo:\033[0m Displays complete system hardware and software details.")
-    print("\033[96mOSReinstall:\033[0m Mounts ISO and triggers Windows setup.")
-    print("\033[96mAppInstall:\033[0m Silently installs a selected EXE application.")
+    print("\033[96mOSReinstall:\033[0m Downloads Media Creation Tool from GitHub and triggers Windows setup.")
+    print("\033[96mAppInstall:\033[0m Downloads Office setup from GitHub and silently installs it.")
     print("\033[96mActivator:\033[0m Runs the Microsoft licensing activator script.")
     print("\033[96mChrome:\033[0m Installs Google Chrome silently via Winget.")
     print("\033[96mMSLogin:\033[0m Opens Windows Work/School account setup and OneDrive.")
     print("\033[96mBackupD:\033[0m Creates a symbolic link from D: drive to OneDrive.")
-    print("\033[96mBranding:\033[0m Applies corporate wallpaper and lock screen images.")
+    print("\033[96mBranding:\033[0m Applies corporate wallpaper and lock screen images using inbuilt executable resources.")
     print("\033[96mBanner:\033[0m Sets a legal notice banner and renames PC based on Emp ID.")
     print("\033[96mUpdateApps:\033[0m Upgrades all installed applications using Winget.")
     print("\033[96mUpdateDrivers:\033[0m Triggers Windows Update to install missing drivers.")
@@ -625,7 +643,6 @@ def internet_fixer_menu():
         elif choice == '9':
             print("\n\033[1m\033[93m[>>>] PROCESS STARTED: Gigabit (Opens Network Connections to manually configure 1Gbps duplex)...\033[0m\n")
             os.system("start ncpa.cpl")
-            print("\033[96mSet Adapter Properties > Advanced > Speed & Duplex > 1.0 Gbps\033[0m\n")
             print("\n\033[1m\033[92m[✓] Done\033[0m")
             input("\n\033[90mEnter to continue...\033[0m")
         elif choice == '0':
@@ -776,7 +793,7 @@ def main():
             tools_menu(system_data)
         elif action == 'quit':
             os.system('cls' if os.name == 'nt' else 'clear')
-            print("\n\033[1m\033[92mExiting... Have a great day!\033[0m")
+            print("\n\033[1m\033[92mExiting...\033[0m")
             time.sleep(1.5)
             sys.exit()
         else:

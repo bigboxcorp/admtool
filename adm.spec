@@ -2,10 +2,10 @@
 
 
 a = Analysis(
-    ['updater.py'],
+    ['adm.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('homescreen.png', '.'), ('lockscreen.png', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
