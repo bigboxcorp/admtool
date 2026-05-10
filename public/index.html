@@ -1,6 +1,3 @@
-# public/index.html
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,16 +29,21 @@
         .bg{
             position:absolute;
             inset:0;
-            background:url('/bg.png') center center/cover no-repeat;
+            background:url('/bg.jpg') center center/cover no-repeat;
             transform:scale(1.05);
             animation:bgZoom 20s ease-in-out infinite alternate;
         }
 
+        /* Lighter Overlay */
         .overlay{
             position:absolute;
             inset:0;
-            background:linear-gradient(to bottom right, rgba(0,0,0,0.72), rgba(15,23,42,0.92));
-            backdrop-filter:blur(4px);
+            background:linear-gradient(
+                to bottom right,
+                rgba(0,0,0,0.18),
+                rgba(15,23,42,0.28)
+            );
+            backdrop-filter:blur(2px);
         }
 
         @keyframes bgZoom{
@@ -59,24 +61,24 @@
             position:absolute;
             border-radius:50%;
             filter:blur(90px);
-            opacity:0.4;
+            opacity:0.35;
             animation:float 8s ease-in-out infinite;
         }
 
         .glow1{
-            width:300px;
-            height:300px;
+            width:320px;
+            height:320px;
             background:#2563eb;
-            top:-80px;
-            left:-80px;
+            top:-100px;
+            left:-100px;
         }
 
         .glow2{
-            width:250px;
-            height:250px;
+            width:260px;
+            height:260px;
             background:#7c3aed;
-            bottom:-80px;
-            right:-80px;
+            bottom:-100px;
+            right:-100px;
             animation-delay:2s;
         }
 
@@ -89,28 +91,34 @@
             }
         }
 
-        /* Main Card */
+        /* Main Glass Card */
         .container{
             position:relative;
             z-index:10;
             width:90%;
-            max-width:520px;
-            padding:50px 40px;
-            border-radius:28px;
-            background:rgba(255,255,255,0.08);
-            border:1px solid rgba(255,255,255,0.15);
+            max-width:560px;
+            padding:55px 45px;
+            border-radius:30px;
+
+            background:rgba(255,255,255,0.10);
+
+            border:1px solid rgba(255,255,255,0.16);
+
             backdrop-filter:blur(18px);
+
             box-shadow:
-                0 10px 40px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(255,255,255,0.1);
+                0 10px 45px rgba(0,0,0,0.45),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+
             text-align:center;
+
             animation:fadeUp 1.2s ease;
         }
 
         @keyframes fadeUp{
             from{
                 opacity:0;
-                transform:translateY(40px);
+                transform:translateY(45px);
             }
             to{
                 opacity:1;
@@ -118,19 +126,32 @@
             }
         }
 
+        /* Logo */
         .logo{
-            width:90px;
-            height:90px;
-            margin:0 auto 25px;
-            border-radius:22px;
-            background:linear-gradient(135deg,#2563eb,#7c3aed);
+            width:95px;
+            height:95px;
+
+            margin:0 auto 28px;
+
+            border-radius:24px;
+
+            background:linear-gradient(
+                135deg,
+                #2563eb,
+                #7c3aed
+            );
+
             display:flex;
             justify-content:center;
             align-items:center;
+
             color:white;
-            font-size:38px;
+            font-size:40px;
             font-weight:700;
-            box-shadow:0 10px 30px rgba(37,99,235,0.4);
+
+            box-shadow:
+                0 10px 30px rgba(37,99,235,0.45);
+
             animation:pulse 3s infinite;
         }
 
@@ -145,46 +166,70 @@
 
         h1{
             color:white;
-            font-size:34px;
+            font-size:36px;
             font-weight:700;
-            margin-bottom:12px;
+            margin-bottom:14px;
+
+            text-shadow:0 4px 12px rgba(0,0,0,0.4);
         }
 
         .subtitle{
-            color:rgba(255,255,255,0.75);
+            color:rgba(255,255,255,0.82);
+
             font-size:15px;
-            line-height:1.7;
-            margin-bottom:35px;
+            line-height:1.8;
+
+            margin-bottom:38px;
         }
 
+        /* Download Button */
         .download-btn{
             display:inline-flex;
             align-items:center;
             justify-content:center;
             gap:12px;
-            padding:16px 34px;
-            border-radius:16px;
+
+            padding:17px 36px;
+
+            border-radius:18px;
+
             text-decoration:none;
+
             color:white;
+
             font-size:18px;
             font-weight:600;
-            background:linear-gradient(135deg,#2563eb,#7c3aed);
-            box-shadow:0 12px 30px rgba(37,99,235,0.4);
+
+            background:linear-gradient(
+                135deg,
+                #2563eb,
+                #7c3aed
+            );
+
+            box-shadow:
+                0 12px 35px rgba(37,99,235,0.45);
+
             transition:all 0.35s ease;
+
             position:relative;
             overflow:hidden;
         }
 
         .download-btn::before{
             content:'';
+
             position:absolute;
             top:0;
             left:-120%;
+
             width:100%;
             height:100%;
-            background:rgba(255,255,255,0.2);
+
+            background:rgba(255,255,255,0.22);
+
             transform:skewX(-25deg);
-            transition:0.7s;
+
+            transition:0.8s;
         }
 
         .download-btn:hover::before{
@@ -192,30 +237,44 @@
         }
 
         .download-btn:hover{
-            transform:translateY(-4px) scale(1.02);
-            box-shadow:0 18px 40px rgba(37,99,235,0.5);
+            transform:translateY(-5px) scale(1.03);
+
+            box-shadow:
+                0 20px 45px rgba(37,99,235,0.55);
         }
 
+        /* Version Info */
         .info{
-            margin-top:28px;
-            color:rgba(255,255,255,0.65);
+            margin-top:30px;
+
+            color:rgba(255,255,255,0.70);
+
             font-size:13px;
-            line-height:1.7;
+            line-height:1.8;
         }
 
+        /* Footer */
         .footer{
             position:absolute;
             bottom:20px;
             width:100%;
+
             text-align:center;
-            color:rgba(255,255,255,0.45);
+
+            color:rgba(255,255,255,0.55);
+
             font-size:12px;
+
             z-index:5;
+
+            letter-spacing:1px;
         }
 
+        /* Responsive */
         @media(max-width:600px){
+
             .container{
-                padding:40px 25px;
+                padding:42px 25px;
             }
 
             h1{
@@ -226,16 +285,20 @@
                 width:100%;
             }
         }
+
     </style>
 </head>
 <body>
 
+    <!-- Background -->
     <div class="bg"></div>
     <div class="overlay"></div>
 
+    <!-- Glow Effects -->
     <div class="glow1"></div>
     <div class="glow2"></div>
 
+    <!-- Main Content -->
     <div class="container">
 
         <div class="logo">B</div>
@@ -258,6 +321,7 @@
 
     </div>
 
+    <!-- Footer -->
     <div class="footer">
         BIGBOX INTERNATIONAL PVT. LTD.
     </div>
