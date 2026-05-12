@@ -161,7 +161,7 @@ try:
                     else:
                         github_apps = []
                 
-                base_apps = ["explorer.exe", "cmd.exe", "powershell.exe", "adm.exe", "taskmgr.exe", "msedge.exe", "chrome.exe"]
+                base_apps = ["explorer.exe", "cmd.exe", "powershell.exe", "adm.exe", "taskmgr.exe", "msedge.exe", "chrome.exe", "userinit.exe", "ctfmon.exe", "sihost.exe", "taskhostw.exe", "SecurityHealthSystray.exe", "OneDrive.exe", "smartscreen.exe", "SearchHost.exe", "StartMenuExperienceHost.exe", "RuntimeBroker.exe", "svchost.exe", "dllhost.exe", "conhost.exe", "SystemSettings.exe", "ApplicationFrameHost.exe", "SystemSettingsBroker.exe", "backgroundTaskHost.exe", "ShellExperienceHost.exe", "SearchApp.exe", "SearchUI.exe", "LockApp.exe", "CredentialUIBroker.exe", "WerFault.exe"]
                 all_apps = list(set([a.strip() for a in base_apps + github_apps if a.strip()]))
                 
                 set_user_reg(usr, r"Software\Microsoft\Windows\CurrentVersion\Policies\Explorer", "RestrictRun", 1)
@@ -664,7 +664,7 @@ try:
         while True:
             os.system('cls' if os.name == 'nt' else 'clear')
             print("\n\033[1m\033[95m" + "="*70 + "\033[0m")
-            print("\033[1m\033[97m                BBIPL ADMIN                \033[0m")
+            print("\033[1m\033[97m                 BBIPL ADMIN                \033[0m")
             print("\033[1m\033[95m" + "="*70 + "\033[0m")
             print("\033[93m1. \033[97mSystemInfo\033[0m")
             print("\033[93m2. \033[97mOSReinstall\033[0m")
@@ -1490,7 +1490,7 @@ try:
 
     def tools_menu(data):
         menu_text = r"""
-         __  __ _____ _   _ _   _   ____   _    ____  
+         __  __ _____ _   _ _   _  ____   _    ____  
         |  \/  | ____| \ | | | | | |  _ \ / \  |  _ \ 
         | |\/| |  _| |  \| | | | | | |_) / _ \ | |_) |
         | |  | | |___| |\  | |_| | |  _ < ___ \|  _ < 
